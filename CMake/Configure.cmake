@@ -44,4 +44,41 @@ configure_gtest(${Http_SOURCE_DIR}/Test/googletest
                 ${Http_SOURCE_DIR}/Test/googletest/googletest/include)
 
 
+DefineExternalTargetEx(
+    Utils Extern
+    ${Http_SOURCE_DIR}/Internal/Utils 
+    ${Http_SOURCE_DIR}/Internal/Utils
+    ${Http_BUILD_TEST}
+    ${Http_AUTO_RUN_TEST}
+)
+
+
+DefineExternalTargetEx(
+    Threads Extern
+    ${Http_SOURCE_DIR}/Internal/Threads 
+    ${Http_SOURCE_DIR}/Internal/Threads
+    ${Http_BUILD_TEST}
+    ${Http_AUTO_RUN_TEST}
+)
+
+
+
+DefineExternalTargetEx(
+    ParserBase Extern
+    ${Http_SOURCE_DIR}/Internal/ParserBase 
+    ${Http_SOURCE_DIR}/Internal/ParserBase
+    ${Http_BUILD_TEST}
+    ${Http_AUTO_RUN_TEST}
+)
+              
+
+
+DefineExternalTargetEx(
+    Sockets Extern
+    ${Http_SOURCE_DIR}/Internal/Sockets 
+    ${Http_SOURCE_DIR}/Internal/Sockets
+    ${Http_BUILD_TEST}
+    ${Http_AUTO_RUN_TEST}
+)
+       
 set(Configure_SUCCEEDED TRUE)
