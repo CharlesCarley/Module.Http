@@ -80,5 +80,8 @@ DefineExternalTargetEx(
     ${Http_BUILD_TEST}
     ${Http_AUTO_RUN_TEST}
 )
-       
+if (WIN32)
+    set(Sockets_LIBRARY ${Sockets_LIBRARY} "WS2_32")
+endif()     
+
 set(Configure_SUCCEEDED TRUE)

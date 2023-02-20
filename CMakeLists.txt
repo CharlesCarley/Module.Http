@@ -38,14 +38,14 @@ else()
     add_subdirectory(Internal/Sockets)
 
     set(TargetFolders TRUE)
-    set(TargetName Http)
     set(TargetGroup )
-
+    set(TargetName Http)
     set(Http_INCLUDE  ${Http_SOURCE_DIR})
-    set(Http_LIBRARY  ${TargetName})
+    set(Http_LIBRARY  Http Html)
 endif()
 
-add_subdirectory(Source)
+add_subdirectory(Http)
+add_subdirectory(Html)
 
 if (Http_BUILD_TEST)
     if (NOT Http_ExternalTarget)
