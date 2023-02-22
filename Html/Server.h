@@ -22,6 +22,9 @@
 #pragma once
 #include "Http/RequestListener.h"
 #include "Sockets/PlatformSocket.h"
+#include "Sockets/ServerSocket.h"
+#include "Threads/CriticalSection.h"
+#include "Utils/Path.h"
 
 namespace Rt2::Html
 {
@@ -32,11 +35,11 @@ namespace Rt2::Html
     class Server
     {
     private:
-        Socket           _srv{Sockets::Net::InvalidSocket};
-        RequestListener* _requestListener{nullptr};
+        Sockets::ServerSocket* _srv{nullptr};
+        PathUtil               _root;
+        RequestListener*       _requestListener{nullptr};
 
-        void acceptConnections() const;
-        void tryProcess(const Socket & sock) const;
+        void tryProcess(const Socket& sock) const;
 
     public:
         Server();
@@ -48,7 +51,9 @@ namespace Rt2::Html
 
         void runSignaled() const;
 
-        void runDetached() const;
+        void exit();
+
+        void setRoot(const String& root);
     };
 
 }  // namespace Rt2::Html

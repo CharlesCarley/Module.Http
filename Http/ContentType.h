@@ -20,36 +20,43 @@
 -------------------------------------------------------------------------------
 */
 #pragma once
-#include "Utils/Char.h"
 #include "Utils/Definitions.h"
+#include "Utils/String.h"
 
 namespace Rt2::Http
 {
-    constexpr const char* Eol = "\r\n";
 
-    struct EnumNameTable
+    class ContentType
     {
-        const char*  value;
-        const I8     type;
-        const size_t size;
+    public:
+        enum Type
+        {
+            AppOctetStream,
+            TextHtml,
+            TextCss,
+            TextJson,
+            Undefined,
+        };
+
+    private:
+        const I8 _type{Undefined};
+
+        static String toString(I8 type);
+
+        static I8 fromString(const String& str);
+
+    public:
+        explicit ContentType(const I8& type) :
+            _type(type) {}
+
+        const I8& type() const
+        {
+            return _type;
+        }
 
         String string() const
         {
-            return {value, size};
-        }
-
-        static I8 enumeration(const String&        str,
-                              const EnumNameTable* values,
-                              const size_t         len,
-                              const I8             def)
-        {
-            for (size_t i = 0; i < len; ++i)
-            {
-                if (const auto& [v, t, s] = values[i];
-                    Char::equals(str.c_str(), str.size(), v, s))
-                    return t;
-            }
-            return def;
+            return toString(_type);
         }
     };
 

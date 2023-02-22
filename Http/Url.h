@@ -20,37 +20,64 @@
 -------------------------------------------------------------------------------
 */
 #pragma once
-#include "Utils/Char.h"
 #include "Utils/Definitions.h"
+#include "Utils/String.h"
 
 namespace Rt2::Http
 {
-    constexpr const char* Eol = "\r\n";
+    constexpr char Http[4] = {'h', 't', 't', 'p'};
+    constexpr U16  Port    = 80;
 
-    struct EnumNameTable
+    class Url
     {
-        const char*  value;
-        const I8     type;
-        const size_t size;
+    private:
+        String _authority{};
+        String _scheme{Http, 4};
+        U16    _port{Port};
+        String _path{};
 
-        String string() const
-        {
-            return {value, size};
-        }
+    public:
+        Url() = default;
 
-        static I8 enumeration(const String&        str,
-                              const EnumNameTable* values,
-                              const size_t         len,
-                              const I8             def)
-        {
-            for (size_t i = 0; i < len; ++i)
-            {
-                if (const auto& [v, t, s] = values[i];
-                    Char::equals(str.c_str(), str.size(), v, s))
-                    return t;
-            }
-            return def;
-        }
+        explicit Url(const String& url);
+
+        void setScheme(const String& scheme);
+
+        void setPath(const String& path);
+
+        void setAuthority(const String& auth);
+
+        void setPort(const U16& port);
+
+        const String& scheme() const;
+
+        const String& authority() const;
+
+        const U16& port() const;
+
+        const String& path() const;
+
+        String value() const;
     };
+
+    inline const String& Url::scheme() const
+    {
+        return _scheme;
+    }
+
+    inline const String& Url::authority() const
+    {
+        return _authority;
+    }
+
+    inline const U16& Url::port() const
+    {
+        return _port;
+    }
+
+    inline const String& Url::path() const
+    {
+        return _path;
+    }
 
 }  // namespace Rt2::Http

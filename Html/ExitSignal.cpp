@@ -29,15 +29,10 @@ namespace Rt2::Html
     void ExitSignal::signalMethod(int)
     {
         if (_signal)
-        {
-            Sockets::Net::close(_signal->_socket);
             _signal->_signaled = true;
-        }
     }
 
-    ExitSignal::ExitSignal(const Sockets::Net::Socket socket) :
-        _signaled(false),
-        _socket(socket)
+    ExitSignal::ExitSignal()
     {
         _signal = this;
         (void)signal(SIGINT, signalMethod);

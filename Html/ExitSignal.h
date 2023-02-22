@@ -28,13 +28,12 @@ namespace Rt2::Html
     {
     private:
         static ExitSignal* _signal;
-        bool                  _signaled{false};
-        Sockets::Net::Socket  _socket{Sockets::Net::InvalidSocket};
+        bool               _signaled{false};
 
         static void signalMethod(int);
 
     public:
-        explicit ExitSignal(const Sockets::Net::Socket socket);
+        explicit ExitSignal();
 
         ~ExitSignal();
 

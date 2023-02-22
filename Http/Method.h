@@ -20,36 +20,54 @@
 -------------------------------------------------------------------------------
 */
 #pragma once
-#include "Utils/Char.h"
 #include "Utils/Definitions.h"
+#include "Utils/String.h"
 
 namespace Rt2::Http
 {
-    constexpr const char* Eol = "\r\n";
 
-    struct EnumNameTable
+    class Method
     {
-        const char*  value;
-        const I8     type;
-        const size_t size;
+    public:
+        enum Type
+        {
+            Get,
+            Put,
+            Post,
+            Delete,
+            Head,
+            Connect,
+            Undefined,
+        };
+
+    private:
+        I8 _type{Undefined};
+
+        static String toString(I8 type);
+
+        static I8 fromString(const String& str);
+
+    public:
+        explicit Method(const I8& type) :
+            _type(type) {}
+        explicit Method(const String& type) :
+            _type(fromString(type)) {}
+
+        Method(const Method&) = default;
+
+        const I8& type() const
+        {
+            return _type;
+        }
 
         String string() const
         {
-            return {value, size};
+            return toString(_type);
         }
 
-        static I8 enumeration(const String&        str,
-                              const EnumNameTable* values,
-                              const size_t         len,
-                              const I8             def)
+        bool isTypeOf(const Type& type) const
         {
-            for (size_t i = 0; i < len; ++i)
-            {
-                if (const auto& [v, t, s] = values[i];
-                    Char::equals(str.c_str(), str.size(), v, s))
-                    return t;
-            }
-            return def;
+            return _type == type;
         }
     };
 

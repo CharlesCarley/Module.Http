@@ -21,13 +21,24 @@
 */
 #include "Http/Request.h"
 #include "Http/Common.h"
+#include "Url.h"
 #include "Utils/Exception.h"
 
 namespace Rt2::Http
 {
     Request::Request() :
-        _method(Get)
+        _method(Method::Get)
     {
+    }
+
+    void Request::setUrl(const Url& url)
+    {
+        _url = url;
+    }
+
+    void Request::setMethod(const Method& method)
+    {
+        _method = method;
     }
 
     void Request::extractHeader(IStream& in)
@@ -35,22 +46,11 @@ namespace Rt2::Http
         // header <method> <relative-url> <version> CRLF
         String method;
         in >> method;
-        if (method == "GET")
-            _method = Get;
-        else if (method == "HEAD")
-            _method = Head;
-        else if (method == "PUT")
-            _method = Put;
-        else if (method == "POST")
-            _method = Post;
-        else if (method == "DELETE")
-            _method = Delete;
-        else if (method == "CONNECT")
-            _method = Connect;
-        else
-            throw Exception("undefined method ", method);
+        setMethod(Method(method));
 
-        in >> _url;
+        String url;
+        in >> url;
+        _url = Url(url);
 
         String version;
         in >> version;
@@ -60,13 +60,29 @@ namespace Rt2::Http
     void Request::read(IStream& in)
     {
         // header <method> <relative-url> <version> CRLF
-        extractHeader(in);
+        if (!in.eof())
+        {
+            extractHeader(in);
 
-        Console::writeLine("Method: ", _method);
-        Console::writeLine("URL   : ", _url);
+            Console::writeLine("Method: ", _method.string());
+            Console::writeLine("URL   : ", _url.value());
 
-        // ignore the rest
-        while (!in.eof())
-            (void)in.get();
+            // ignore the rest
+            while (!in.eof())
+                (void)in.get();
+        }
+    }
+
+    void Request::write(OStream& out) const
+    {
+        out << _method.string();
+        out << ' ' << _url.value() << ' ' << "HTTP/1.1" << Eol;
+    }
+
+    String Request::toString() const
+    {
+        OutputStringStream ss;
+        write(ss);
+        return ss.str();
     }
 }  // namespace Rt2::Http

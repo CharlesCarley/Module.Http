@@ -19,38 +19,42 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#pragma once
+#include "Http/ContentType.h"
+#include "Http/Common.h"
 #include "Utils/Char.h"
 #include "Utils/Definitions.h"
+#include "Utils/Exception.h"
+#include "Utils/String.h"
 
 namespace Rt2::Http
 {
-    constexpr const char* Eol = "\r\n";
-
-    struct EnumNameTable
-    {
-        const char*  value;
-        const I8     type;
-        const size_t size;
-
-        String string() const
-        {
-            return {value, size};
-        }
-
-        static I8 enumeration(const String&        str,
-                              const EnumNameTable* values,
-                              const size_t         len,
-                              const I8             def)
-        {
-            for (size_t i = 0; i < len; ++i)
-            {
-                if (const auto& [v, t, s] = values[i];
-                    Char::equals(str.c_str(), str.size(), v, s))
-                    return t;
-            }
-            return def;
-        }
+    constexpr EnumNameTable ContentTypeValues[] = {
+        {"application/octet-stream", ContentType::AppOctetStream, 24},
+        {               "text/html",       ContentType::TextHtml,  9},
+        {                "text/css",        ContentType::TextCss,  8},
+        {               "text/json",       ContentType::TextJson,  9},
     };
 
+    String ContentType::toString(I8 type)
+    {
+        switch (type)
+        {
+        case AppOctetStream:
+        case TextHtml:
+        case TextCss:
+        case TextJson:
+            return ContentTypeValues[type].string();
+        default:
+            throw Exception("undefined Content type ", type);
+        }
+    }
+
+    I8 ContentType::fromString(const String& str)
+    {
+        return EnumNameTable::enumeration(
+            str,
+            ContentTypeValues,
+            std::size(ContentTypeValues),
+            Undefined);
+    }
 }  // namespace Rt2::Http

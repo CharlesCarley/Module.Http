@@ -31,19 +31,25 @@ namespace Rt2::Http
     {
     }
 
-    void Response::write(const OutputStringStream& stream,
-                         const String&             contentType) const
+    void Response::write(IStream&      stream,
+                         const String& contentType) const
     {
-        String str = stream.str();
+        OutputStringStream oss;
+        while (!stream.eof())
+            oss.put((char)stream.get());
+
+        String str = oss.str();
 
         OutputStringStream resp;
         resp << "HTTP/1.1 200 OK" << Eol;
         resp << "Content-Type: " << contentType << Eol;
         resp << "Content-Length: " << str.size() << Eol;
         resp << Eol << Eol;
-        resp << str << ' ';
-        str = resp.str();
+        resp << str << '\n'
+             << Eol;
 
+
+        str = resp.str();
         Sockets::Net::writeBuffer(_sock, str.c_str(), str.size());
     }
 
@@ -59,7 +65,6 @@ namespace Rt2::Http
         Sockets::SocketOutputStream resp(_sock);
         resp << "HTTP/1.1 404 NOT FOUND";
         resp << Eol << Eol;
-
     }
 
 }  // namespace Rt2::Http

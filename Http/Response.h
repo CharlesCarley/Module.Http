@@ -24,6 +24,9 @@
 
 namespace Rt2::Http
 {
+
+
+
     class Response
     {
     private:
@@ -33,8 +36,9 @@ namespace Rt2::Http
         explicit Response(const Sockets::Net::Socket& sock);
         ~Response() = default;
 
-        void write(const OutputStringStream& stream, const String& contentType) const;
+        void write(IStream& stream, const String& contentType) const;
         void write() const;
+
         void writeNotFound() const;
     };
 

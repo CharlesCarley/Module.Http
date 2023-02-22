@@ -21,12 +21,13 @@
 */
 #include "Html/Server.h"
 #include <csignal>
+#include <thread>
 #include "ExitSignal.h"
 #include "Http/Request.h"
 #include "Http/Response.h"
-#include "Sockets/Connection.h"
 #include "Sockets/SocketStream.h"
 #include "Threads/Task.h"
+#include "Threads/Thread.h"
 #include "Utils/Exception.h"
 
 namespace Rt2::Html
@@ -34,13 +35,11 @@ namespace Rt2::Html
     using namespace Sockets;
     using namespace Net;
 
-    Server::Server()
-    {
-        ensureInitialized();
-    }
+    Server::Server() = default;
 
     Server::~Server()
     {
+        exit();
     }
 
     void Server::setListener(RequestListener* listener)
@@ -48,50 +47,32 @@ namespace Rt2::Html
         _requestListener = listener;
     }
 
-    bool Server::start(const String& address, uint16_t port)
+    bool Server::start(const String& address, const uint16_t port)
     {
-        _srv = create(AddrINet, Stream);
-        if (_srv == InvalidSocket)
-            throw Exception("Failed to create server socket");
-
-        constexpr char opt = 1;
-        if (setOption(_srv,
-                      SocketLevel,
-                      ReuseAddress,
-                      &opt,
-                      sizeof(char)) != Ok)
-        {
-            throw Exception("Failed to set socket option");
-        }
-
-        SocketInputAddress host;
-        constructInputAddress(host, AddrINet, port, address);
-
-        if (Net::bind(_srv, host) != Ok)
-            throw Exception("Failed to bind server socket to ", address, ':', port);
-
-        if (listen(_srv, 100) != Ok)
-            throw Exception("Failed to listen on the server socket");
-
+        _srv = new ServerSocket(address, port);
+        _srv->connect([=](const Net::Socket& cli)
+                      { tryProcess(cli); });
+        _srv->start();
         return true;
     }
 
     void Server::runSignaled() const
     {
-        const ExitSignal sig(_srv);
-        while (!sig.signaled())
-        {
-            Threads::Task::start(
-                [=]
-                { acceptConnections(); });
-        }
-    }
+        Console::nl();
+        Console::setForeground(CS_GREEN);
+        Console::write("Server running press");
+        Console::setForeground(CS_WHITE);
+        Console::write(" Ctrl+C");
+        Console::setForeground(CS_GREEN);
+        Console::write(" to exit.");
+        Console::nl();
+        Console::resetColor();
 
-    void Server::acceptConnections() const
-    {
-        Connection client;
-        if (const auto sock = accept(_srv, client); sock != InvalidSocket)
-            tryProcess(sock);
+        const ExitSignal sig;
+        while (!sig.signaled())
+            std::this_thread::yield();
+
+        _srv->stop();
     }
 
     void Server::tryProcess(const Socket& sock) const
@@ -103,24 +84,36 @@ namespace Rt2::Html
                 Http::Request     request;
                 SocketInputStream ss(sock);
                 request.read(ss);
+
+
                 Http::Response response(sock);
                 _requestListener->handle(request, response);
             }
-
             close(sock);
         }
         catch (Exception& ex)
         {
+            Console::setForeground(CS_RED);
             Console::writeLine(ex.what());
         }
     }
 
-    void Server::runDetached() const
+    void Server::exit()
     {
-        Threads::Task::start(
-            [=]
-            {
-                runSignaled();
-            });
+        if (_srv)
+        {
+            _srv->stop();
+            while (_srv->isValid())
+                Threads::Thread::sleep(1000);
+        }
+        delete _srv;
+        _srv = nullptr;
+    }
+
+    void Server::setRoot(const String& root)
+    {
+        _root = PathUtil(root);
+        if (!_root.exists())
+            throw Exception("server root directory is invalid");
     }
 }  // namespace Rt2::Html

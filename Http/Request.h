@@ -21,17 +21,19 @@
 */
 #pragma once
 #include "Http/Common.h"
+#include "Http/Method.h"
+#include "Http/Url.h"
 #include "Sockets/PlatformSocket.h"
 
 namespace Rt2::Http
 {
+
     class Request
     {
     private:
         Method _method;
-        String _url;
+        Url    _url;
 
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
         void extractHeader(IStream& in);
 
     public:
@@ -39,19 +41,27 @@ namespace Rt2::Http
 
         ~Request() = default;
 
-        const String& url() const;
+        void setUrl(const Url& url);
 
-        Method method() const;
+        void setMethod(const Method& method);
+
+        const Url& url() const;
+
+        const Method& method() const;
 
         void read(IStream& in);
+
+        void write(OStream& out) const;
+
+        String toString() const;
     };
 
-    inline const String& Request::url() const
+    inline const Url& Request::url() const
     {
         return _url;
     }
 
-    inline Method Request::method() const
+    inline const Method& Request::method() const
     {
         return _method;
     }

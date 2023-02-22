@@ -19,38 +19,46 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#pragma once
+#include "Http/Method.h"
+#include "Http/Common.h"
 #include "Utils/Char.h"
 #include "Utils/Definitions.h"
+#include "Utils/Exception.h"
+#include "Utils/String.h"
 
 namespace Rt2::Http
 {
-    constexpr const char* Eol = "\r\n";
-
-    struct EnumNameTable
-    {
-        const char*  value;
-        const I8     type;
-        const size_t size;
-
-        String string() const
-        {
-            return {value, size};
-        }
-
-        static I8 enumeration(const String&        str,
-                              const EnumNameTable* values,
-                              const size_t         len,
-                              const I8             def)
-        {
-            for (size_t i = 0; i < len; ++i)
-            {
-                if (const auto& [v, t, s] = values[i];
-                    Char::equals(str.c_str(), str.size(), v, s))
-                    return t;
-            }
-            return def;
-        }
+    constexpr EnumNameTable MethodValues[] = {
+        {    "GET",     Method::Get, 3},
+        {    "PUT",     Method::Put, 3},
+        {   "POST",    Method::Post, 4},
+        { "DELETE",  Method::Delete, 6},
+        {   "HEAD",    Method::Head, 4},
+        {"CONNECT", Method::Connect, 7},
     };
 
+    String Method::toString(I8 type)
+    {
+        switch (type)
+        {
+        case Post:
+        case Put:
+        case Delete:
+        case Get:
+        case Head:
+        case Connect:
+            return MethodValues[type].string();
+        default:
+            throw Exception("undefined method ", type);
+        }
+    }
+
+    I8 Method::fromString(const String& str)
+    {
+        return EnumNameTable::enumeration(
+            str,
+            MethodValues,
+            std::size(MethodValues),
+            Undefined);
+    }
 }  // namespace Rt2::Http
