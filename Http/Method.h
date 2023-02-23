@@ -48,8 +48,9 @@ namespace Rt2::Http
         static I8 fromString(const String& str);
 
     public:
-        explicit Method(const I8& type) :
+        Method(const I8& type) :
             _type(type) {}
+
         explicit Method(const String& type) :
             _type(fromString(type)) {}
 

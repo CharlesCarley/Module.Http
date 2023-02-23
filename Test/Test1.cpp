@@ -101,7 +101,7 @@ GTEST_TEST(Html, Html_001)
         socket.isOpen())
     {
         Http::Request req;
-        req.setMethod(Http::Get);
+        req.setMethod(Http::Method::Get);
         req.setUrl(url);
         socket.write(req.toString());
     }

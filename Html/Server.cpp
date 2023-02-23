@@ -70,8 +70,7 @@ namespace Rt2::Html
 
         const ExitSignal sig;
         while (!sig.signaled())
-            std::this_thread::yield();
-
+            Threads::Thread::yield();
         _srv->stop();
     }
 

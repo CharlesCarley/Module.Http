@@ -44,17 +44,25 @@ namespace Rt2::Http
     void Request::extractHeader(IStream& in)
     {
         // header <method> <relative-url> <version> CRLF
+        StringStream ss;
+        while (!in.eof())
+            ss.put((char)in.get());
+        Console::writeLine(ss.str());
+
         String method;
         in >> method;
-        setMethod(Method(method));
+        if (!method.empty())
+        {
+            setMethod(Method(method));
 
-        String url;
-        in >> url;
-        _url = Url(url);
+            String url;
+            in >> url;
+            _url = Url(url);
 
-        String version;
-        in >> version;
-        (void)in.get();
+            String version;
+            in >> version;
+            (void)in.get();
+        }
     }
 
     void Request::read(IStream& in)

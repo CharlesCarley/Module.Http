@@ -29,12 +29,13 @@
 namespace Rt2::Http
 {
     constexpr EnumNameTable MethodValues[] = {
-        {    "GET",     Method::Get, 3},
-        {    "PUT",     Method::Put, 3},
-        {   "POST",    Method::Post, 4},
-        { "DELETE",  Method::Delete, 6},
-        {   "HEAD",    Method::Head, 4},
-        {"CONNECT", Method::Connect, 7},
+        {      "GET",       Method::Get, 3},
+        {      "PUT",       Method::Put, 3},
+        {     "POST",      Method::Post, 4},
+        {   "DELETE",    Method::Delete, 6},
+        {     "HEAD",      Method::Head, 4},
+        {  "CONNECT",   Method::Connect, 7},
+        {"UNDEFINED", Method::Undefined, 9},
     };
 
     String Method::toString(I8 type)
@@ -47,9 +48,10 @@ namespace Rt2::Http
         case Get:
         case Head:
         case Connect:
+        case Undefined:
             return MethodValues[type].string();
         default:
-            throw Exception("undefined method ", type);
+            throw Exception("undefined method ", (int)type);
         }
     }
 
