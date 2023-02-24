@@ -2,6 +2,8 @@
 #include "Html/Server.h"
 #include "Http/Request.h"
 #include "Http/Response.h"
+#include "Http/Uri/Scanner.h"
+#include "Http/Uri/Token.h"
 #include "Sockets/ClientSocket.h"
 #include "Sockets/SocketStream.h"
 #include "ThisDir.h"
@@ -10,6 +12,20 @@
 #include "gtest/gtest.h"
 
 using namespace Rt2;
+
+GTEST_TEST(Http, Uri_001)
+{
+    StringStream ss;
+    ss << "/foo";
+    Http::Uri::Scanner us;
+    us.attach(&ss);
+
+    TokenBase t0;
+    us.scan(t0);
+    EXPECT_EQ(t0.type(),  Http::Uri::TOK_SLASH);
+    us.scan(t0);
+    EXPECT_EQ(t0.type(),  Http::Uri::TOK_ID);
+}
 
 void ExpectThrow(const std::function<void()> fn)
 {
@@ -53,9 +69,9 @@ GTEST_TEST(Http, Url_001)
     ExpectThrow([]
                 { Http::Url u("http://foo-bar-"); });
     ExpectNoThrow([]
-                { Http::Url u("http://foo.bar:8080"); });
+                  { Http::Url u("http://foo.bar:8080"); });
     ExpectNoThrow([]
-                { Http::Url u("http://foo.bar:8080/a/b/c/d"); });
+                  { Http::Url u("http://foo.bar:8080/a/b/c/d"); });
 
     const Http::Url u("http://foo.bar:8080/a/b/c/d");
 

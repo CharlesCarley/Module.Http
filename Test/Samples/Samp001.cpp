@@ -1,4 +1,5 @@
 #include "Html/Server.h"
+#include "Http/ContentType.h"
 #include "Http/Request.h"
 #include "Http/Response.h"
 #include "Http/Url.h"
@@ -11,17 +12,22 @@ void go()
     class Listener final : public Http::RequestListener
     {
     public:
-        void handle(const Http::Request& request,
-                    Http::Response&      response) override
+        void handle(const Http::Request& request, Http::Response& response) override
         {
             if (request.method().isTypeOf(Http::Method::Get))
             {
-                if (const String& path = request.url().path(); 
+                if (const String& path = request.url().path();
                     path == "/" || path == "/index.html")
                 {
-                    if (InputFileStream ifs(TestFile("Samp001/index.html")); 
+                    if (InputFileStream ifs(TestFile("Samp001/index.html"));
                         ifs.is_open())
-                        response.write(ifs, "text/html");
+                        response.write(ifs, Http::ContentType::TextHtml);
+                }
+                else if (path == "/style.css")
+                {
+                    if (InputFileStream ifs(TestFile("Samp001/style.css"));
+                        ifs.is_open())
+                        response.write(ifs, Http::ContentType::TextCss);
                 }
             }
             else
@@ -31,7 +37,7 @@ void go()
         }
     };
 
-    const Http::Url url("http://127.0.0.1:5000/");
+    const Http::Url url("localhost");
 
     Html::Server s;
     s.setRoot(TestFile("Samp001"));

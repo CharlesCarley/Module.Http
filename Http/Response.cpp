@@ -21,50 +21,64 @@
 */
 #include "Response.h"
 #include "Common.h"
+#include "ContentType.h"
 #include "Sockets/PlatformSocket.h"
 #include "Sockets/SocketStream.h"
 
 namespace Rt2::Http
 {
+    constexpr const char* HttpVer    = "HTTP/1.1 ";
+    constexpr size_t      HttpVerLen = 9;
+
     Response::Response(const Sockets::Net::Socket& sock) :
         _sock(sock)
     {
     }
 
-    void Response::write(IStream&      stream,
-                         const String& contentType) const
+    void Response::write(IStream& stream, const ContentType& contentType) const
     {
         OutputStringStream oss;
-        while (!stream.eof())
-            oss.put((char)stream.get());
+        Su::copy(oss, stream, false);
+        oss.put('\n');
+        oss.put('\n');
 
-        String str = oss.str();
-
-        OutputStringStream resp;
-        resp << "HTTP/1.1 200 OK" << Eol;
-        resp << "Content-Type: " << contentType << Eol;
-        resp << "Content-Length: " << str.size() << Eol;
-        resp << Eol << Eol;
-        resp << str << '\n'
-             << Eol;
-
-
-        str = resp.str();
-        Sockets::Net::writeBuffer(_sock, str.c_str(), str.size());
+        Sockets::SocketOutputStream resp(_sock);
+        writeCode(resp, 200);
+        writeContent(resp, oss.str(), contentType);
     }
 
     void Response::write() const
     {
         Sockets::SocketOutputStream resp(_sock);
-        resp << "HTTP/1.1 200 OK";
-        resp << Eol << Eol;
+        writeCode(resp, 200);
     }
 
     void Response::writeNotFound() const
     {
         Sockets::SocketOutputStream resp(_sock);
-        resp << "HTTP/1.1 404 NOT FOUND";
-        resp << Eol << Eol;
+        writeCode(resp, 404);
+    }
+
+    void Response::writeCode(OStream& out, const int code)
+    {
+        if (code == 200)
+        {
+            out.write(HttpVer, HttpVerLen);
+            out << code << " OK" << Eol;
+        }
+        else if (code == 404)
+        {
+            out.write(HttpVer, HttpVerLen);
+            out << code << " NOT FOUND" << Eol;
+        }
+    }
+
+    void Response::writeContent(OStream& out, const String& content, const ContentType& contentType)
+    {
+        out << "Content-Type: " << contentType.string() << Eol;
+        out << "Content-Length: " << content.size() << Eol;
+        out << Eol << Eol;
+        out << content;
     }
 
 }  // namespace Rt2::Http

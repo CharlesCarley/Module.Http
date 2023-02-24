@@ -52,7 +52,6 @@ namespace Rt2::Http
 
         stPath = Npos;
         stPort = Npos;
-
         for (size_t i = 0; i < work.size(); ++i)
         {
             char ch = work[i];
@@ -82,7 +81,7 @@ namespace Rt2::Http
             }
         }
 
-        if (authority.empty())
+        if (authority.empty() || authority == "localhost")
             authority = "127.0.0.1";
         else
         {
@@ -125,7 +124,6 @@ namespace Rt2::Http
             work = str.substr(4, str.size());
             if (work.substr(0, 3) != "://")
                 throw Exception("invalid path");
-
             work = work.substr(3, str.size());
         }
 

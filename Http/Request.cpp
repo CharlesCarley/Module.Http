@@ -44,11 +44,6 @@ namespace Rt2::Http
     void Request::extractHeader(IStream& in)
     {
         // header <method> <relative-url> <version> CRLF
-        StringStream ss;
-        while (!in.eof())
-            ss.put((char)in.get());
-        Console::writeLine(ss.str());
-
         String method;
         in >> method;
         if (!method.empty())

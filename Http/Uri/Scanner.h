@@ -19,44 +19,31 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "Http/ContentType.h"
-#include "Http/Common.h"
-#include "Utils/Char.h"
+#pragma once
+#include "ParserBase/ScannerBase.h"
 #include "Utils/Definitions.h"
-#include "Utils/Exception.h"
 #include "Utils/String.h"
 
-namespace Rt2::Http
+namespace Rt2::Http::Uri
 {
-    constexpr EnumNameTable ContentTypeValues[] = {
-        {"application/octet-stream", ContentType::AppOctetStream, 24},
-        {               "text/html",       ContentType::TextHtml,  9},
-        {                "text/css",        ContentType::TextCss,  8},
-        {              "text/plain",      ContentType::TextPlain, 10},
-        {               "text/json",       ContentType::TextJson,  9},
-    };
-
-    String ContentType::toString(I8 type)
+    class Scanner final : public ScannerBase
     {
-        switch (type)
+    public:
+        enum State
         {
-        case AppOctetStream:
-        case TextHtml:
-        case TextCss:
-        case TextPlain:
-        case TextJson:
-            return ContentTypeValues[type].string();
-        default:
-            throw Exception("undefined Content type ", type);
-        }
-    }
+            Start,
+            Relative,
+            RelativeNet,
+            Absolute,
+        };
 
-    I8 ContentType::fromString(const String& str)
-    {
-        return EnumNameTable::enumeration(
-            str,
-            ContentTypeValues,
-            std::size(ContentTypeValues),
-            Undefined);
-    }
-}  // namespace Rt2::Http
+    private:
+        I8 _state{Start};
+
+        void setStartState(int ch);
+    public:
+        void scanInt(TokenBase& tok);
+        void scanId(TokenBase& tok);
+        void scan(TokenBase& tok) override;
+    };
+}  // namespace Rt2::Http::Uri

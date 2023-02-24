@@ -34,6 +34,7 @@ namespace Rt2::Http
             AppOctetStream,
             TextHtml,
             TextCss,
+            TextPlain,
             TextJson,
             Undefined,
         };
@@ -46,7 +47,7 @@ namespace Rt2::Http
         static I8 fromString(const String& str);
 
     public:
-        explicit ContentType(const I8& type) :
+        ContentType(const I8& type) :
             _type(type) {}
 
         const I8& type() const
