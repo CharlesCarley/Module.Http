@@ -20,17 +20,48 @@
 -------------------------------------------------------------------------------
 */
 #pragma once
+#include "Utils/Definitions.h"
 #include "Utils/FileSystem.h"
 #include "Utils/String.h"
 
 namespace Rt2::Html
 {
+    enum TextAlignment
+    {
+        AlignStart,
+        AlignCenter,
+        AlignEnd,
+    };
+    enum TextSize
+    {
+        ExtraLarge = 1,
+        Large      = 2,
+        Medium     = 5,
+        Small      = 6,
+    };
+
+    enum ColorIndex
+    {
+        Color0 = 0,
+        Color1,
+        Color2,
+        Color3,
+        Color4,
+        Color5,
+        Color6,
+        Color7,
+        Color8,
+        Color9,
+    };
+
     class Document
     {
     private:
         int                _sectionCount{0};
         OutputStringStream _out;
         String             _data;
+        ColorIndex         _bg{Color0};
+        ColorIndex         _fg{Color9};
 
     public:
         Document();
@@ -41,11 +72,11 @@ namespace Rt2::Html
 
         void endDocument(const String& footer);
 
-        void beginContainerDiv();
+        void beginContainerDiv(bool stretch = true);
 
-        void beginDivRow();
+        void beginDivRow(TextAlignment al = AlignStart);
 
-        void beginDivCol();
+        void beginDivCol(TextAlignment al = AlignStart);
 
         void endDiv();
 
@@ -55,7 +86,10 @@ namespace Rt2::Html
 
         void br();
 
-        void paragraph(const String& text, int size);
+        void paragraph(const String& text, TextSize size = Medium, TextAlignment al = AlignStart);
+
+        void setBackground(ColorIndex ci) { _bg = ci; }
+        void setForeground(ColorIndex ci) { _fg = ci; }
 
         const String& flush();
     };

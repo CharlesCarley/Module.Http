@@ -62,7 +62,7 @@ namespace Rt2::Http
         try
         {
             OutputStringStream oss;
-            Su::copy(oss, stream, false);
+            Su::copy(oss, stream, false, false);
             oss.put('\n');
             oss.put('\n');
 

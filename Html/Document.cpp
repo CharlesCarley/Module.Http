@@ -32,33 +32,78 @@ namespace Rt2::Html
 
     Document::~Document() = default;
 
+    String textAlign(const TextAlignment al)
+    {
+        switch (al)
+        {
+        default:
+        case AlignStart:
+            return "text-start";
+        case AlignCenter:
+            return "text-center";
+        case AlignEnd:
+            return "text-end";
+        }
+    }
+
+    String background(const ColorIndex idx)
+    {
+        return Su::join('b', idx);
+    }
+
+    String foreground(const ColorIndex idx)
+    {
+        return Su::join('f', idx);
+    }
+
     void Document::beginDocument(const String& header)
     {
         if (InputFileStream ifs(header);
             ifs.is_open())
-            Su::copy(_out, ifs, false, true);
+            Su::copy(_out, ifs, false, false);
     }
 
     void Document::endDocument(const String& footer)
     {
         if (InputFileStream ifs(footer);
             ifs.is_open())
-            Su::copy(_out, ifs, false, true);
+            Su::copy(_out, ifs, false, false);
     }
 
-    void Document::beginContainerDiv()
+    void Document::beginContainerDiv(const bool stretch)
     {
-        Ts::print(_out, "<div ", AttrString("class", "container-fluid default"), ">");
+        const String cont = stretch ? "container-fluid" : "container";
+        Ts::print(_out,
+                  "<div",
+                  AttrString("class",
+                             Su::csv(' ',
+                                     cont,
+                                     background(_bg))),
+                  ">");
     }
 
-    void Document::beginDivRow()
+    void Document::beginDivRow(const TextAlignment al)
     {
-        Ts::print(_out, "<div ", AttrString("class", "row"), ">");
+        Ts::print(_out,
+                  "<div",
+                  AttrString("class",
+                             Su::csv(' ',
+                                     "row",
+                                     textAlign(al),
+                                     background(_bg))),
+                  ">");
     }
 
-    void Document::beginDivCol()
+    void Document::beginDivCol(const TextAlignment al)
     {
-        Ts::print(_out, "<div ", AttrString("class", "col"), ">");
+        Ts::print(_out,
+                  "<div",
+                  AttrString("class",
+                             Su::csv(' ',
+                                     "col",
+                                     textAlign(al),
+                                     background(_bg))),
+                  ">");
     }
 
     void Document::endDiv()
@@ -69,7 +114,14 @@ namespace Rt2::Html
     void Document::beginSection(const String& title)
     {
         _sectionCount = Min(++_sectionCount, 6);
-        Ts::write(_out, 0, "<h", _sectionCount, '>', title, "</h", _sectionCount, '>');
+        Ts::print(_out,
+                  "<h",
+                  _sectionCount,
+                  '>',
+                  title,
+                  "</h",
+                  _sectionCount,
+                  '>');
     }
 
     void Document::endSection()
@@ -82,9 +134,16 @@ namespace Rt2::Html
         Ts::print(_out, "<br/>");
     }
 
-    void Document::paragraph(const String& text, int size)
+    void Document::paragraph(const String& text, const TextSize size, const TextAlignment al)
     {
-        Ts::print(_out, "<p ", AttrString("class", "par-" + Char::toString(size)), ">", text, "</p>");
+        String fontSize = Su::join("fs-", (int)size);
+        Ts::print(_out,
+                  "<p",
+                  AttrString("class",
+                             Su::csv(' ', fontSize, textAlign(al), foreground(_fg))),
+                  ">",
+                  text,
+                  "</p>");
     }
 
     const String& Document::flush()

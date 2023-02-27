@@ -17,13 +17,14 @@ public:
     static void respondFile(const Http::Response& response, const String& path)
     {
         const PathUtil pu = PathUtil(path);
-
         if (const Http::ContentType content(pu.lastExtension());
             content.type() != Http::ContentType::Undefined)
         {
             if (InputFileStream ifs(Su::join(TestFile("Samp001/"), path));
                 ifs.is_open())
+            {
                 response.write(ifs, content.type());
+            }
         }
         else
         {
@@ -36,15 +37,34 @@ public:
         PathUtil fileName(path);
 
         Html::Document doc;
+        doc.setBackground(Html::Color3);
+        doc.setForeground(Html::Color0);
+
         doc.beginDocument(TestFile("Samp001/header.html"));
-        doc.beginContainerDiv();
-
-        doc.paragraph("a", 12);
-        doc.beginContainerDiv();
-
-
+        doc.beginContainerDiv(true);
+        doc.beginDivCol();
+        doc.paragraph(fileName.directory(), Html::Medium, Html::AlignStart);
         doc.endDiv();
         doc.endDiv();
+
+        doc.setBackground(Html::Color0);
+        doc.setForeground(Html::Color5);
+
+        doc.beginContainerDiv(false);
+
+        doc.beginDivRow();
+        doc.paragraph(fileName.fullPath(), Html::Small, Html::AlignStart);
+        doc.endDiv();
+
+        doc.beginDivRow();
+        doc.paragraph(fileName.fullPath(), Html::Small, Html::AlignCenter);
+        doc.endDiv();
+        doc.beginDivRow();
+        doc.paragraph(fileName.fullPath(), Html::Small, Html::AlignEnd);
+        doc.endDiv();
+
+        doc.endDiv();
+
         doc.endDocument(TestFile("Samp001/footer.html"));
         response.write(doc.flush(), Http::ContentType::TextHtml);
     }
@@ -54,9 +74,13 @@ public:
     {
         if (request.method().isTypeOf(Http::Method::Get))
         {
-            if (const String& path = request.url().path();
+            if (String path = request.url().path();
                 path == "/" || path.empty())
+            {
+                if (!path.empty() && path[0] == '/')
+                    path = path.substr(1, path.size());
                 respondMain(response, Su::join(CurrentSourceDirectory, path));
+            }
             else
                 respondFile(response, path);
         }
