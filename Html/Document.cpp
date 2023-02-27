@@ -21,235 +21,76 @@
 */
 #include "Html/Document.h"
 #include "Html/Command.h"
+#include "Utils/Char.h"
 #include "Utils/Path.h"
-
-
+#include "Utils/StreamMethods.h"
+#include "Utils/TextStreamWriter.h"
 
 namespace Rt2::Html
 {
-    HtmlDocumentWriter::HtmlDocumentWriter() :
-        _sectionDepth(1)
+    Document::Document() = default;
+
+    Document::~Document() = default;
+
+    void Document::beginDocument(const String& header)
     {
+        if (InputFileStream ifs(header);
+            ifs.is_open())
+            Su::copy(_out, ifs, false, true);
     }
 
-    HtmlDocumentWriter::~HtmlDocumentWriter() = default;
-
-    void HtmlDocumentWriter::beginDocument(OStream& output, const String& title)
+    void Document::endDocument(const String& footer)
     {
-        output << R"(<!DOCTYPE html>)" << std::endl;
-        output << R"(<html>)" << std::endl;
-        output << "<head>" << std::endl;
-        output << R"(<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>)" << std::endl;
-        output << R"(<meta http-equiv="X-UA-Compatible" content="IE=9" />)" << std::endl;
-        output << R"(<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>)" << std::endl;
-        output << R"(<meta name="robots" content="noindex" />)" << std::endl;
-        output << R"(<meta name="generator" content="MdDox"/>)" << std::endl;
-        output << R"(<meta name="viewport" content="width=device-width, initial-scale=1"/>)" << std::endl;
-        output << "<title>" << title << "</title>" << std::endl;
-        output << "</head>" << std::endl;
-        output << "<body>" << std::endl;
-
-        Html::beginDivSection(output, "document");
-        Html::beginDivSection(output, "document-content");
-        Html::heading(output, 1, title);
+        if (InputFileStream ifs(footer);
+            ifs.is_open())
+            Su::copy(_out, ifs, false, true);
     }
 
-    void HtmlDocumentWriter::endDocument(OStream& output, const String& docSource)
+    void Document::beginContainerDiv()
     {
-        Html::endDivSection(output, "document-content");
-        Html::endDivSection(output, "document");
-
-        output << "</body>" << std::endl;
-        output << "</html>" << std::endl;
+        Ts::print(_out, "<div ", AttrString("class", "container-fluid default"), ">");
     }
 
-    void HtmlDocumentWriter::addSection(OStream& output, const String& title, int depth)
+    void Document::beginDivRow()
     {
-        Html::heading(output, depth, title);
+        Ts::print(_out, "<div ", AttrString("class", "row"), ">");
     }
 
-    void HtmlDocumentWriter::writeSection(OStream& output, const String& title) const
+    void Document::beginDivCol()
     {
-        Html::heading(output, _sectionDepth, title);
+        Ts::print(_out, "<div ", AttrString("class", "col"), ">");
     }
 
-    void HtmlDocumentWriter::beginSection(OStream& output, const String& title, const int depth)
+    void Document::endDiv()
     {
-        if (depth < 0)
-            _sectionDepth++;
-        else
-            _sectionDepth = depth;
-
-        if (_sectionDepth > 6)
-            _sectionDepth = 6;
-
-        writeSection(output, title);
+        Ts::print(_out, "</div>");
     }
 
-    void HtmlDocumentWriter::endSection(OStream& output)
+    void Document::beginSection(const String& title)
     {
-        --_sectionDepth;
-        if (_sectionDepth < 0)
-            _sectionDepth = 0;
+        _sectionCount = Min(++_sectionCount, 6);
+        Ts::write(_out, 0, "<h", _sectionCount, '>', title, "</h", _sectionCount, '>');
     }
 
-    void HtmlDocumentWriter::beginSectionBar(OStream& output)
+    void Document::endSection()
     {
-        Html::beginDivSection(output, "section-bar");
+        _sectionCount = Max(--_sectionCount, 0);
     }
 
-    void HtmlDocumentWriter::endSectionBar(OStream& output)
+    void Document::br()
     {
-        Html::endDivSection(output, "section-bar");
+        Ts::print(_out, "<br/>");
     }
 
-    void HtmlDocumentWriter::beginMethod(OStream& output, const String& title, const String& id)
+    void Document::paragraph(const String& text, int size)
     {
-        _sectionDepth++;
-        Html::heading(output, _sectionDepth, title);
+        Ts::print(_out, "<p ", AttrString("class", "par-" + Char::toString(size)), ">", text, "</p>");
     }
 
-    void HtmlDocumentWriter::endMethod(OStream& output)
+    const String& Document::flush()
     {
-        endSection(output);
+        _data = _out.str();
+        _out.str("");
+        return _data;
     }
-
-    void HtmlDocumentWriter::beginList(OStream& output, const String& header)
-    {
-        if (!header.empty())
-        {
-            Html::beginDivSection(output, "list-heading");
-            Html::boldText(output, header);
-            Html::endDivSection(output, "list-heading");
-        }
-
-        Html::beginOrderedList(output);
-    }
-
-    void HtmlDocumentWriter::endList(OStream& output)
-    {
-        Html::endOrderedList(output);
-    }
-
-    void HtmlDocumentWriter::beginParagraph(OStream& output)
-    {
-        Html::beginParagraph(output);
-    }
-
-    void HtmlDocumentWriter::endParagraph(OStream& output)
-    {
-        Html::endParagraph(output);
-    }
-
-    void HtmlDocumentWriter::beginBlockQuote(OStream& output)
-    {
-        Html::beginBlockQuote(output);
-    }
-
-    void HtmlDocumentWriter::endBlockQuote(OStream& output)
-    {
-        Html::endBlockQuote(output);
-    }
-
-    void HtmlDocumentWriter::beginListItem(OStream& output)
-    {
-        Html::beginListItem(output);
-    }
-
-    void HtmlDocumentWriter::endListItem(OStream& output)
-    {
-        Html::endListItem(output);
-    }
-
-    void HtmlDocumentWriter::paragraph(OStream& output, const String& text)
-    {
-        Html::paragraph(output, text);
-    }
-
-    void HtmlDocumentWriter::inlineText(OStream& output, const String& text)
-    {
-        Html::inlineText(output, text);
-    }
-
-    void HtmlDocumentWriter::boldText(OStream& output, const String& text)
-    {
-        Html::boldText(output, text);
-    }
-
-    void HtmlDocumentWriter::italicText(OStream& output, const String& text)
-    {
-        Html::italicText(output, text);
-    }
-
-    void HtmlDocumentWriter::typewriterText(OStream& output, const String& text)
-    {
-        Html::typewriterText(output, text);
-    }
-
-    void HtmlDocumentWriter::code(OStream& output, const String& text, const String& type)
-    {
-        Html::code(output, text);
-    }
-
-    void HtmlDocumentWriter::image(OStream& output, const String& src)
-    {
-        Html::embedImage(output, src);
-    }
-
-    void HtmlDocumentWriter::listItem(OStream& output, const String& title, const String& href)
-    {
-        String tVal;
-        Su::trimWs(tVal, title);
-
-        if (!href.empty())
-        {
-            String link;
-            Su::replaceAll(link, href, "\\", "/");
-
-            Html::beginListItem(output);
-            Html::beginLink(output, link);
-            output << tVal;
-            Html::endLink(output);
-            Html::endListItem(output);
-        }
-        else
-        {
-            Html::beginListItem(output);
-            output << tVal;
-            Html::endListItem(output);
-        }
-    }
-
-    void HtmlDocumentWriter::listIcon(OStream& output, const String& image, const String& href)
-    {
-        if (!href.empty())
-        {
-            const PathUtil path(href);
-            Html::linkImage(output, image, path.fullPath());
-        }
-    }
-
-    void HtmlDocumentWriter::anchor(OStream& output, const String& id)
-    {
-        Html::anchor(output, id);
-    }
-
-    void HtmlDocumentWriter::horizontalRule(OStream& output)
-    {
-        Html::horizontalRule(output);
-    }
-
-    void HtmlDocumentWriter::lineBreak(OStream& output)
-    {
-        Html::lineBreak(output);
-    }
-
-    void HtmlDocumentWriter::linkUrl(OStream& output, const String& title, const String& ref)
-    {
-    }
-
-    void HtmlDocumentWriter::linkText(OStream& output, const String& title, const String& ref)
-    {
-    }
-
 }  // namespace Rt2::Html

@@ -34,6 +34,7 @@ namespace Rt2::Http
         {                "text/css",        ContentType::TextCss,  8},
         {              "text/plain",      ContentType::TextPlain, 10},
         {               "text/json",       ContentType::TextJson,  9},
+        {         "text/javascript",         ContentType::TextJs, 15},
     };
 
     String ContentType::toString(I8 type)
@@ -45,6 +46,7 @@ namespace Rt2::Http
         case TextCss:
         case TextPlain:
         case TextJson:
+        case TextJs:
             return ContentTypeValues[type].string();
         default:
             throw Exception("undefined Content type ", type);
@@ -58,5 +60,20 @@ namespace Rt2::Http
             ContentTypeValues,
             std::size(ContentTypeValues),
             Undefined);
+    }
+
+    I8 ContentType::fromFile(const String& str)
+    {
+        if (str == ".html")
+            return TextHtml;
+        if (str == ".json")
+            return TextJson;
+        if (str == ".css")
+            return TextCss;
+        if (str == ".js")
+            return TextJs;
+        if (str == ".map")
+            return TextJs;
+        return Undefined;
     }
 }  // namespace Rt2::Http

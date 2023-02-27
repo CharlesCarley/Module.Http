@@ -90,14 +90,11 @@ namespace Rt2::Http::Uri
         {
             dest.push_back((char)ch);
             ch = _stream->get();
-
-            if (ch <= 0)
-                syntaxError("unexpected end of file");
         }
         _stream->putback((char)ch);
 
         // save it to the cache and set it's index
-        tok.setIndex(save(Char::toUint64(dest)));
+        tok.setIndex(save(Char::toInt32(dest)));
         tok.setType(TOK_DIGIT);
     }
 
@@ -106,14 +103,14 @@ namespace Rt2::Http::Uri
         String dest;
 
         int ch = _stream->get();
-        while (isLower(ch))
+        while (isLetter(ch) || isDecimal(ch))
         {
             dest.push_back((char)ch);
             ch = _stream->get();
-
-            if (ch <= 0)
-                syntaxError("unexpected end of file");
         }
+
+        // restore the last read character
+        // that was not a letter or a decimal.
         _stream->putback((char)ch);
 
         // save it to the cache and set it's index
@@ -128,10 +125,7 @@ namespace Rt2::Http::Uri
         if (ch == '/')
         {
             if (_stream->peek() == '/')
-            {
                 _state = RelativeNet;
-                (void)_stream->get();
-            }
             else
                 _state = Relative;
         }
@@ -215,10 +209,13 @@ namespace Rt2::Http::Uri
                 tok.setType(TOK_RP);
                 return;
             case Digits09:
+                // TODO: separate out digits from hex digits
+                _stream->putback((char)ch);
                 scanInt(tok);
                 return;
             case LowerCaseAz:
             case UpperCaseAz:
+                _stream->putback((char)ch);
                 scanId(tok);
                 return;
             default:

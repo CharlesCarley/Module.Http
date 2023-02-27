@@ -41,9 +41,12 @@ namespace Rt2::Http::Uri
         I8 _state{Start};
 
         void setStartState(int ch);
+
     public:
         void scanInt(TokenBase& tok);
         void scanId(TokenBase& tok);
         void scan(TokenBase& tok) override;
+
+        I8 state() const { return _state; }
     };
 }  // namespace Rt2::Http::Uri

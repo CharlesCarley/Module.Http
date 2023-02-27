@@ -1,3 +1,18 @@
-body {
-    background-color: aquamarine;
+:root {
+    /**/
+    --empty: #FF00FF;
+    --background-color: #FaFaFa;
+    --background-color-content: #FeFeFe;
+    --foreground-color: #2E2E2F;
+    --color-link: #7196c9;
+    --color-bold: #509BD2;
+    --color-accent: #509BD2;
+    --color-border: #aeb6c2;
+    --color-clear: #E4E4E4;
+    --code-background: #F0F0F0;
+    --code-foreground: #9197a0;
+}
+
+.default{
+    background-color: var(--empty);
 }

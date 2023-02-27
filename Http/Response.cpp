@@ -24,6 +24,7 @@
 #include "ContentType.h"
 #include "Sockets/PlatformSocket.h"
 #include "Sockets/SocketStream.h"
+#include "Utils/Exception.h"
 
 namespace Rt2::Http
 {
@@ -35,16 +36,46 @@ namespace Rt2::Http
     {
     }
 
+    void Response::write(const String& data, const ContentType& contentType) const
+    {
+        try
+        {
+            OutputStringStream oss;
+            oss.write(data.c_str(), data.size());
+            oss.put('\n');
+            oss.put('\n');
+
+            Sockets::SocketOutputStream resp(_sock);
+            writeCode(resp, 200);
+            writeContent(resp, oss.str(), contentType);
+        }
+        catch (Exception& ex)
+        {
+            Sockets::SocketOutputStream resp(_sock);
+            writeCode(resp, 404);
+            writeContent(resp, ex.what(), ContentType::TextPlain);
+        }
+    }
+
     void Response::write(IStream& stream, const ContentType& contentType) const
     {
-        OutputStringStream oss;
-        Su::copy(oss, stream, false);
-        oss.put('\n');
-        oss.put('\n');
+        try
+        {
+            OutputStringStream oss;
+            Su::copy(oss, stream, false);
+            oss.put('\n');
+            oss.put('\n');
 
-        Sockets::SocketOutputStream resp(_sock);
-        writeCode(resp, 200);
-        writeContent(resp, oss.str(), contentType);
+            Sockets::SocketOutputStream resp(_sock);
+            writeCode(resp, 200);
+            writeContent(resp, oss.str(), contentType);
+        }
+        catch (Exception& ex)
+        {
+            Sockets::SocketOutputStream resp(_sock);
+            writeCode(resp, 404);
+            writeContent(resp, ex.what(), ContentType::TextPlain);
+        }
     }
 
     void Response::write() const

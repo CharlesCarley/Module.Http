@@ -38,6 +38,7 @@ namespace Rt2::Http
         explicit Response(const Sockets::Net::Socket& sock);
         ~Response() = default;
 
+        void write(const String& data, const ContentType& contentType) const;
         void write(IStream& stream, const ContentType& contentType) const;
 
         void write() const;

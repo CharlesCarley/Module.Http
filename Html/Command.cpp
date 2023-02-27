@@ -27,7 +27,7 @@ namespace Rt2::Html
 {
     void lineBreak(OStream& output)
     {
-        output << "<br/>" << std::endl;
+        output << "<br/>";
     }
 
     void space(OStream& output, int i)
@@ -39,12 +39,12 @@ namespace Rt2::Html
     void beginDivSection(OStream& output, const char* name)
     {
         comment(output, name);
-        output << "<div class=\"" << name << "\">" << std::endl;
+        output << "<div class=\"" << name << "\">";
     }
 
     void endDivSection(OStream& output, const char* name)
     {
-        output << "</div>" << std::endl;
+        output << "</div>";
         comment(output, name);
     }
 
@@ -64,21 +64,20 @@ namespace Rt2::Html
 
     void beginBlockQuote(OStream& output)
     {
-        output << "<blockquote>" << std::endl;
+        output << "<blockquote>";
     }
 
     void endBlockQuote(OStream& output)
     {
-        output << "</blockquote>" << std::endl;
+        output << "</blockquote>";
     }
 
     void code(OStream& output, const String& code, const String& type)
     {
-        beginDivSection(output, "code-block");
-        output << "<pre><code>";
-
         if (!code.empty())
         {
+            beginDivSection(output, "code-block");
+            output << "<pre><code>";
             String cpy;
             Su::replaceAll(cpy, cpy, "&", "&amp;");
             Su::replaceAll(cpy, code, ">", "&gt;");
@@ -89,11 +88,9 @@ namespace Rt2::Html
 
             if (!isNewLine(code.back()))
                 output << std::endl;
+            output << "</code></pre>";
+            endDivSection(output, "code-block");
         }
-        else
-            output << std::endl;
-        output << "</code></pre>" << std::endl;
-        endDivSection(output, "code-block");
     }
 
     void beginParagraph(OStream& output)
@@ -117,14 +114,14 @@ namespace Rt2::Html
 
     void horizontalRule(OStream& output)
     {
-        output << "<hr/>" << std::endl;
+        output << "<hr/>" ;
     }
 
     void anchor(OStream& output, const String& id)
     {
         String assertLower;
         Su::toLower(assertLower, id);
-        output << "<a id=\"" << assertLower << "\"></a>" << std::endl;
+        output << "<a id=\"" << assertLower << "\"></a>" ;
     }
 
     void inlineText(OStream& output, const String& str, const String& className)
@@ -146,7 +143,7 @@ namespace Rt2::Html
     {
         String out;
         Su::trimWs(out, str);
-        output << "<code class=\"typewriter\">" << out << "</code>" << std::endl;
+        output << "<code class=\"typewriter\">" << out << "</code>" ;
     }
 
     void boldText(OStream& output, const String& str)
@@ -178,7 +175,7 @@ namespace Rt2::Html
 
     void comment(OStream& output, const String& str)
     {
-        //output << "<!-- " << str << " -->" << std::endl;
+        // output << "<!-- " << str << " -->" ;
     }
 
     void heading(OStream& output, int index, const String& heading)
@@ -198,7 +195,7 @@ namespace Rt2::Html
 
     void endSpan(OStream& output)
     {
-        output << "</span>" << std::endl;
+        output << "</span>" ;
     }
 
     void beginLink(OStream& output, const String& ref, const String& className)
@@ -211,17 +208,17 @@ namespace Rt2::Html
 
     void endLink(OStream& output)
     {
-        output << "</a>" << std::endl;
+        output << "</a>";
     }
 
     void beginOrderedList(OStream& output)
     {
-        output << "<ul>" << std::endl;
+        output << "<ul>";
     }
 
     void endOrderedList(OStream& output)
     {
-        output << "</ul>" << std::endl;
+        output << "</ul>";
     }
 
     void beginListItem(OStream& output)
@@ -231,7 +228,7 @@ namespace Rt2::Html
 
     void endListItem(OStream& output)
     {
-        output << "</li>" << std::endl;
+        output << "</li>";
     }
 
     void beginHeading(OStream& output, int index)
@@ -243,8 +240,7 @@ namespace Rt2::Html
     void endHeading(OStream& output, int index)
     {
         index = std::min(std::max(1, index), 6);
-        output << "</h" << index << ">" << std::endl;
+        output << "</h" << index << ">";
     }
 
-    
-}  // namespace MdDox::Html
+}  // namespace Rt2::Html

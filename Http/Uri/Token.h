@@ -34,6 +34,7 @@ namespace Rt2::Http::Uri
         TOK_ALPHA,
         TOK_ID,
         TOK_DIGIT,
+        TOK_HEX,
         TOK_POUND      = '#',
         TOK_SLASH      = '/',
         TOK_DOT        = '.',

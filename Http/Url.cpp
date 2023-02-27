@@ -20,6 +20,7 @@
 -------------------------------------------------------------------------------
 */
 #include "Http/Url.h"
+#include "Uri/Parser.h"
 #include "Utils/Char.h"
 #include "Utils/Exception.h"
 
@@ -141,13 +142,10 @@ namespace Rt2::Http
 
     Url::Url(const String& url)
     {
-        UrlScanner uc;
-        uc.scan(url);
-
-        _scheme    = uc.scheme;
-        _port      = uc.port;
-        _authority = uc.authority;
-        _path      = uc.path;
+        Uri::Parser       p;
+        InputStringStream ss(url);
+        p.read(ss);
+        *this = p.url();
     }
 
     void Url::setScheme(const String& scheme)
@@ -158,8 +156,13 @@ namespace Rt2::Http
 
     void Url::setPath(const String& path)
     {
-        // TODO: needs validated
-        _path = path;
+        if (!path.empty())
+        {
+            if (path[0] != '/')
+                _path = Su::join('/', path);
+            else
+                _path = path;
+        }
     }
 
     void Url::setAuthority(const String& auth)

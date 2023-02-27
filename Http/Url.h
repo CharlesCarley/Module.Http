@@ -25,16 +25,32 @@
 
 namespace Rt2::Http
 {
+
+    enum ValidSchemes
+    {
+        FileScheme,
+        HttpScheme,
+    };
+
     constexpr char Http[4] = {'h', 't', 't', 'p'};
     constexpr U16  Port    = 80;
 
     class Url
     {
+    public:
+        enum Type
+        {
+            Absolute,
+            Relative,
+            Network
+        };
+
     private:
         String _authority{};
         String _scheme{Http, 4};
         U16    _port{Port};
         String _path{};
+        I8     _type{Absolute};
 
     public:
         Url() = default;
@@ -58,6 +74,10 @@ namespace Rt2::Http
         const String& path() const;
 
         String value() const;
+
+        I8 type() const;
+
+        void setType(const I8& type);
     };
 
     inline const String& Url::scheme() const
@@ -78,6 +98,16 @@ namespace Rt2::Http
     inline const String& Url::path() const
     {
         return _path;
+    }
+
+    inline I8 Url::type() const
+    {
+        return _type;
+    }
+
+    inline void Url::setType(const I8& type)
+    {
+        _type = type;
     }
 
 }  // namespace Rt2::Http

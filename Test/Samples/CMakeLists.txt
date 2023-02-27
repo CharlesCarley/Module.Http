@@ -1,10 +1,11 @@
 include(CopyTargets)
 include(TestDirectory)
+include(GroupSet)
 
 gen_path_to_here()
 
 
-macro(make_exe TargetName MAIN)
+macro(make_exe TargetName)
     set(TargetGroup Examples)
 
     include_directories(
@@ -14,7 +15,7 @@ macro(make_exe TargetName MAIN)
         ${Threads_INCLUDE}
         ${ParserBase_INCLUDE}
     )
-    add_executable(${TargetName} ${MAIN})
+    add_executable(${TargetName} ${ARGN})
     target_link_libraries(
         ${TargetName} 
         ${Http_LIBRARY}
@@ -29,6 +30,12 @@ macro(make_exe TargetName MAIN)
 endmacro()
 
 
+set_group(Basic_SRC
+    Source:Samp001.cpp
+    Site:Samp001/*.css
+    Site:Samp001/*.html
+    Site:Samp001/*.svg
+)
 
-make_exe(Basic Samp001.cpp)
+make_exe(Basic ${Basic_SRC})
 

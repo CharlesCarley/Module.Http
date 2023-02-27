@@ -36,6 +36,7 @@ namespace Rt2::Http
             TextCss,
             TextPlain,
             TextJson,
+            TextJs,
             Undefined,
         };
 
@@ -45,10 +46,13 @@ namespace Rt2::Http
         static String toString(I8 type);
 
         static I8 fromString(const String& str);
+        static I8 fromFile(const String& str);
 
     public:
         ContentType(const I8& type) :
             _type(type) {}
+        explicit  ContentType(const String& ext) :
+            _type(fromFile(ext)) {}
 
         const I8& type() const
         {

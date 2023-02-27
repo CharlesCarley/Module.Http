@@ -25,79 +25,39 @@
 
 namespace Rt2::Html
 {
-    class HtmlDocumentWriter
+    class Document
     {
     private:
-        int _sectionDepth;
-
-    protected:
-        void writeSection(OStream& output, const String& title) const;
+        int                _sectionCount{0};
+        OutputStringStream _out;
+        String             _data;
 
     public:
-        HtmlDocumentWriter();
+        Document();
 
-        ~HtmlDocumentWriter();
+        ~Document();
 
-        void beginDocument(OStream& output, const String& title);
+        void beginDocument(const String& header);
 
-        void endDocument(OStream& output, const String& docSource = "");
+        void endDocument(const String& footer);
 
-        void addSection(OStream& output, const String& title, int depth);
+        void beginContainerDiv();
 
-        void beginSection(OStream& output, const String& title, int depth = -1);
+        void beginDivRow();
 
-        void endSection(OStream& output);
+        void beginDivCol();
 
-        void beginSectionBar(OStream& output);
+        void endDiv();
 
-        void endSectionBar(OStream& output);
+        void beginSection(const String& title);
 
-        void beginMethod(OStream& output, const String& title, const String& id);
+        void endSection();
 
-        void endMethod(OStream& output);
+        void br();
 
-        void beginList(OStream& output, const String& header);
+        void paragraph(const String& text, int size);
 
-        void endList(OStream& output);
-
-        void beginParagraph(OStream& output);
-
-        void endParagraph(OStream& output);
-
-        void beginBlockQuote(OStream& output);
-
-        void endBlockQuote(OStream& output);
-
-        void beginListItem(OStream& output);
-
-        void endListItem(OStream& output);
-
-        void paragraph(OStream& output, const String& text);
-
-        void inlineText(OStream& output, const String& text);
-
-        void boldText(OStream& output, const String& text);
-
-        void italicText(OStream& output, const String& text);
-
-        void typewriterText(OStream& output, const String& text);
-
-        void code(OStream& output, const String& text, const String& type = ".txt");
-
-        void image(OStream& output, const String& src);
-
-        void listItem(OStream& output, const String& title, const String& ref);
-
-        void listIcon(OStream& output, const String& image, const String& ref);
-
-        void anchor(OStream& output, const String& id);
-
-        void horizontalRule(OStream& output);
-
-        void lineBreak(OStream& output);
-
-        void linkUrl(OStream& output, const String& title, const String& ref);
-
-        void linkText(OStream& output, const String& title, const String& ref);
+        const String& flush();
     };
+
 }  // namespace Rt2::Html
