@@ -1,6 +1,6 @@
 var Module = {
     resizeEvent: function () {
-        var ctx = document.getElementById("document");
+        var ctx = document.getElementById("main");
         if (ctx != null) {
             ctx.style.height = window.innerHeight + "px";
             ctx.style.width = window.innerWidth + "px";

@@ -28,9 +28,11 @@
 
 namespace Rt2::Html
 {
-    Document::Document() = default;
 
-    Document::~Document() = default;
+    String textSize(TextSize sz)
+    {
+        return Su::join("fs-", (int)sz);
+    }
 
     String textAlign(const TextAlignment al)
     {
@@ -46,6 +48,24 @@ namespace Rt2::Html
         }
     }
 
+    String toArray(StringArray& arr)
+    {
+        bool   f = true;
+        String str;
+        for (auto& ele : arr)
+        {
+            if (f)
+            {
+                f = false;
+            }
+            else
+                str.push_back(' ');
+            str.append(ele);
+        }
+        arr.clear();
+        return str;
+    }
+
     String background(const ColorIndex idx)
     {
         return Su::join('b', idx);
@@ -54,6 +74,24 @@ namespace Rt2::Html
     String foreground(const ColorIndex idx)
     {
         return Su::join('f', idx);
+    }
+    Document::Document() = default;
+
+    Document::~Document() = default;
+
+    void Document::set(TextAlignment al)
+    {
+        _style.push_back(textAlign(al));
+    }
+
+    void Document::set(TextSize size)
+    {
+        _style.push_back(textSize(size));
+    }
+
+    void Document::set(const String& val)
+    {
+        _style.push_back(val);
     }
 
     void Document::beginDocument(const String& header)
@@ -72,38 +110,26 @@ namespace Rt2::Html
 
     void Document::beginContainerDiv(const bool stretch)
     {
-        const String cont = stretch ? "container-fluid" : "container";
-        Ts::print(_out,
-                  "<div",
-                  AttrString("class",
-                             Su::csv(' ',
-                                     cont,
-                                     background(_bg))),
-                  ">");
+        _style.push_back(stretch ? "container-fluid" : "container");
+        _style.push_back(background(_bg));
+        _style.push_back(foreground(_fg));
+        Ts::print(_out, "<div", AttrString("class", toArray(_style)), ">");
     }
 
     void Document::beginDivRow(const TextAlignment al)
     {
-        Ts::print(_out,
-                  "<div",
-                  AttrString("class",
-                             Su::csv(' ',
-                                     "row",
-                                     textAlign(al),
-                                     background(_bg))),
-                  ">");
+        _style.push_back("row");
+        _style.push_back(background(_bg));
+        _style.push_back(foreground(_fg));
+        Ts::print(_out, "<div", AttrString("class", toArray(_style)), ">");
     }
 
     void Document::beginDivCol(const TextAlignment al)
     {
-        Ts::print(_out,
-                  "<div",
-                  AttrString("class",
-                             Su::csv(' ',
-                                     "col",
-                                     textAlign(al),
-                                     background(_bg))),
-                  ">");
+        _style.push_back("col");
+        _style.push_back(background(_bg));
+        _style.push_back(foreground(_fg));
+        Ts::print(_out, "<div", AttrString("class", toArray(_style)), ">");
     }
 
     void Document::endDiv()
@@ -136,11 +162,13 @@ namespace Rt2::Html
 
     void Document::paragraph(const String& text, const TextSize size, const TextAlignment al)
     {
-        String fontSize = Su::join("fs-", (int)size);
+        _style.push_back(textSize(size));
+        _style.push_back(textAlign(al));
+        _style.push_back(foreground(_fg));
+
         Ts::print(_out,
                   "<p",
-                  AttrString("class",
-                             Su::csv(' ', fontSize, textAlign(al), foreground(_fg))),
+                  AttrString("class", toArray(_style)),
                   ">",
                   text,
                   "</p>");

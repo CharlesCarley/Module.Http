@@ -8,6 +8,75 @@
 
 using namespace Rt2;
 
+class Page : public Html::Document
+{
+public:
+    void begin()
+    {
+        setBackground(Html::Color2);
+        setForeground(Html::Color0);
+
+        beginDocument(TestFile("Samp001/header.html"));
+        beginContainerDiv(true);
+    }
+
+    void end()
+    {
+        endDiv();
+        endDocument(TestFile("Samp001/footer.html"));
+    }
+
+    void writeDemo()
+    {
+        setBackground(Html::Color2);
+        setForeground(Html::Color0);
+
+        beginContainerDiv(true);
+        beginDivRow();
+
+        set("min-vh-10");
+        beginDivCol();
+        paragraph("FileBrowser", Html::Medium, Html::AlignStart);
+        endDiv();
+
+        beginDivRow();
+        setBackground(Html::Color8);
+        setForeground(Html::Color0);
+        set("p-3");
+        set("ms-1");
+        beginDivCol();
+        paragraph("AAA", Html::Medium, Html::AlignCenter);
+        endDiv();
+
+        setBackground(Html::Color7);
+        setForeground(Html::Color0);
+        set("p-3");
+        set("ms-1");
+        set("min-vh-90");
+        beginDivCol();
+        paragraph("BBBB", Html::Medium, Html::AlignCenter);
+        endDiv();
+        endDiv();
+
+        endDiv();
+        endDiv();
+    }
+
+    void writeHeader()
+    {
+        setBackground(Html::Color2);
+        setForeground(Html::Color0);
+
+        beginContainerDiv(true);
+        beginDivCol();
+
+        paragraph("FileBrowser", Html::Medium, Html::AlignStart);
+
+        endDiv();
+        endDiv();
+    }
+};
+
 class Response final : public Http::RequestListener
 {
 private:
@@ -22,51 +91,14 @@ public:
         {
             if (InputFileStream ifs(Su::join(TestFile("Samp001/"), path));
                 ifs.is_open())
-            {
                 response.write(ifs, content.type());
-            }
+            else
+                response.writeNotFound();
         }
         else
         {
             response.writeNotFound();
         }
-    }
-
-    static void respondMain(const Http::Response& response, const String& path)
-    {
-        PathUtil fileName(path);
-
-        Html::Document doc;
-        doc.setBackground(Html::Color3);
-        doc.setForeground(Html::Color0);
-
-        doc.beginDocument(TestFile("Samp001/header.html"));
-        doc.beginContainerDiv(true);
-        doc.beginDivCol();
-        doc.paragraph(fileName.directory(), Html::Medium, Html::AlignStart);
-        doc.endDiv();
-        doc.endDiv();
-
-        doc.setBackground(Html::Color0);
-        doc.setForeground(Html::Color5);
-
-        doc.beginContainerDiv(false);
-
-        doc.beginDivRow();
-        doc.paragraph(fileName.fullPath(), Html::Small, Html::AlignStart);
-        doc.endDiv();
-
-        doc.beginDivRow();
-        doc.paragraph(fileName.fullPath(), Html::Small, Html::AlignCenter);
-        doc.endDiv();
-        doc.beginDivRow();
-        doc.paragraph(fileName.fullPath(), Html::Small, Html::AlignEnd);
-        doc.endDiv();
-
-        doc.endDiv();
-
-        doc.endDocument(TestFile("Samp001/footer.html"));
-        response.write(doc.flush(), Http::ContentType::TextHtml);
     }
 
     void handle(const Http::Request& request,
@@ -74,20 +106,17 @@ public:
     {
         if (request.method().isTypeOf(Http::Method::Get))
         {
-            if (String path = request.url().path();
-                path == "/" || path.empty())
-            {
-                if (!path.empty() && path[0] == '/')
-                    path = path.substr(1, path.size());
-                respondMain(response, Su::join(CurrentSourceDirectory, path));
-            }
-            else
+            String path = request.url().path();
+            path        = path.empty() ? "index.html" : path;
+
+            if (const Http::ContentType ct(PathUtil{path}.lastExtension());
+                ct.type() != Http::ContentType::Undefined)
                 respondFile(response, path);
+            else
+                response.writeNotFound();
         }
         else
-        {
             response.writeNotFound();
-        }
     }
 };
 

@@ -62,17 +62,23 @@ namespace Rt2::Html
         String             _data;
         ColorIndex         _bg{Color0};
         ColorIndex         _fg{Color9};
+        StringArray        _style;
 
     public:
         Document();
 
         ~Document();
 
+        void set(TextAlignment al);
+        void set(TextSize size);
+        void set(const String& val);
+
         void beginDocument(const String& header);
 
         void endDocument(const String& footer);
 
         void beginContainerDiv(bool stretch = true);
+
 
         void beginDivRow(TextAlignment al = AlignStart);
 
