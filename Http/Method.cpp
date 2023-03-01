@@ -38,7 +38,7 @@ namespace Rt2::Http
         {"UNDEFINED", Method::Undefined, 9},
     };
 
-    String Method::toString(I8 type)
+    String Method::toString(const I8 type)
     {
         switch (type)
         {

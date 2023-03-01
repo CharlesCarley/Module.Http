@@ -107,7 +107,7 @@ namespace Rt2::Http::Uri
             !isScheme(t0, t1, t2, t3))
             error("expected a scheme declaration");
 
-        const String& scheme = _scanner->string(token(0).index());
+        const String& scheme = string(0);
         if (isInvalidValidScheme(scheme))
             error("invalid scheme type: ", scheme);
 
@@ -143,17 +143,16 @@ namespace Rt2::Http::Uri
     {
         const I8 dc0 = tokenType(1);
         const I8 dc1 = tokenType(3);
-        const I8 dc2 = tokenType(5);
-
-        if (!isDot(dc0, dc1, dc2))
+        if (const I8 dc2 = tokenType(5);
+            !isDot(dc0, dc1, dc2))
             error("invalid ipv4");
 
         if (isIntU8(token(0), token(2), token(4), token(6)))
         {
-            const I32 a = _scanner->integer(token(0).index());
-            const I32 b = _scanner->integer(token(2).index());
-            const I32 c = _scanner->integer(token(4).index());
-            const I32 d = _scanner->integer(token(6).index());
+            const I32 a = integer(0);
+            const I32 b = integer(2);
+            const I32 c = integer(4);
+            const I32 d = integer(6);
 
             char buf[16] = {};
             if (const int l = snprintf(buf, 16, "%d.%d.%d.%d", a, b, c, d);
@@ -164,9 +163,7 @@ namespace Rt2::Http::Uri
             }
         }
         else
-        {
             error("invalid ipv4");
-        }
     }
 
     void Parser::ruleDomain()
@@ -174,8 +171,7 @@ namespace Rt2::Http::Uri
         OutputStringStream out;
         while (isDomainToken(tokenType(0)))
         {
-            switch (const TokenBase& t1 = token(0);
-                    t1.type())
+            switch (tokenType(0))
             {
             case TOK_DOT:
                 out.put('.');
@@ -187,10 +183,10 @@ namespace Rt2::Http::Uri
                 out.put('_');
                 break;
             case TOK_DIGIT:
-                out << Char::toString(_scanner->integer(t1.index()));
+                out << Char::toString(integer(0));
                 break;
             case TOK_ID:
-                out << _scanner->string(t1.index());
+                out << string(0);
                 break;
             default:
                 error("invalid domain name");
@@ -237,8 +233,7 @@ namespace Rt2::Http::Uri
             {
                 // test valid
                 const TokenBase& t0 = token(0);
-                switch (const TokenBase& t1 = token(0);
-                        t1.type())
+                switch (tokenType(0))
                 {
                 case TOK_SLASH:
                     out.put('/');
@@ -253,10 +248,10 @@ namespace Rt2::Http::Uri
                     out.put('_');
                     break;
                 case TOK_DIGIT:
-                    out << Char::toString(_scanner->integer(t1.index()));
+                    out << Char::toString(integer(0));
                     break;
                 case TOK_ID:
-                    out << _scanner->string(t1.index());
+                    out << string(0);
                     break;
                 default:
                     error("invalid path token");
@@ -279,7 +274,7 @@ namespace Rt2::Http::Uri
             if (tokenType(0) != TOK_DIGIT)
                 error("expected a port number");
 
-            if (const I32 v = _scanner->integer(token(0).index());
+            if (const I32 v = integer(0);
                 isRangeU16(v))
                 _url.setPort((U16)v);
             else

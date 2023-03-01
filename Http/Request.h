@@ -20,10 +20,8 @@
 -------------------------------------------------------------------------------
 */
 #pragma once
-#include "Http/Common.h"
 #include "Http/Method.h"
 #include "Http/Url.h"
-#include "Sockets/PlatformSocket.h"
 
 namespace Rt2::Http
 {

@@ -5,77 +5,9 @@
 #include "Http/Response.h"
 #include "Http/Url.h"
 #include "Samples/ThisDir.h"
+#include "Utils/Exception.h"
 
 using namespace Rt2;
-
-class Page : public Html::Document
-{
-public:
-    void begin()
-    {
-        setBackground(Html::Color2);
-        setForeground(Html::Color0);
-
-        beginDocument(TestFile("Samp001/header.html"));
-        beginContainerDiv(true);
-    }
-
-    void end()
-    {
-        endDiv();
-        endDocument(TestFile("Samp001/footer.html"));
-    }
-
-    void writeDemo()
-    {
-        setBackground(Html::Color2);
-        setForeground(Html::Color0);
-
-        beginContainerDiv(true);
-        beginDivRow();
-
-        set("min-vh-10");
-        beginDivCol();
-        paragraph("FileBrowser", Html::Medium, Html::AlignStart);
-        endDiv();
-
-        beginDivRow();
-        setBackground(Html::Color8);
-        setForeground(Html::Color0);
-        set("p-3");
-        set("ms-1");
-        beginDivCol();
-        paragraph("AAA", Html::Medium, Html::AlignCenter);
-        endDiv();
-
-        setBackground(Html::Color7);
-        setForeground(Html::Color0);
-        set("p-3");
-        set("ms-1");
-        set("min-vh-90");
-        beginDivCol();
-        paragraph("BBBB", Html::Medium, Html::AlignCenter);
-        endDiv();
-        endDiv();
-
-        endDiv();
-        endDiv();
-    }
-
-    void writeHeader()
-    {
-        setBackground(Html::Color2);
-        setForeground(Html::Color0);
-
-        beginContainerDiv(true);
-        beginDivCol();
-
-        paragraph("FileBrowser", Html::Medium, Html::AlignStart);
-
-        endDiv();
-        endDiv();
-    }
-};
 
 class Response final : public Http::RequestListener
 {
@@ -96,9 +28,7 @@ public:
                 response.writeNotFound();
         }
         else
-        {
             response.writeNotFound();
-        }
     }
 
     void handle(const Http::Request& request,
@@ -107,7 +37,8 @@ public:
         if (request.method().isTypeOf(Http::Method::Get))
         {
             String path = request.url().path();
-            path        = path.empty() ? "index.html" : path;
+
+            path = path.empty() || path == "/" ? "index.html" : path;
 
             if (const Http::ContentType ct(PathUtil{path}.lastExtension());
                 ct.type() != Http::ContentType::Undefined)
@@ -122,8 +53,7 @@ public:
 
 void go()
 {
-    const Http::Url url("http://127.0.0.1");
-
+    const Http::Url url("http://192.168.1.118:8080");
     Html::Server s;
     s.setRoot(TestFile("Samp001"));
 
@@ -140,8 +70,9 @@ int main(int, char**)
         go();
         return 0;
     }
-    catch (...)
+    catch (Exception &ex)
     {
+        Console::writeError(ex.what());
         return -5;
     }
 }

@@ -61,7 +61,7 @@ namespace Rt2::Http
             return _type;
         }
 
-        String string() const
+        String name() const
         {
             return toString(_type);
         }

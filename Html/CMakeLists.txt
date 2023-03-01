@@ -24,6 +24,7 @@ target_link_libraries(
     ${Utils_LIBRARY}
     ${Sockets_LIBRARY}
     ${Threads_LIBRARY}
+    ${Http_LIBRARY}
 )
 
 set_target_properties(

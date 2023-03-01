@@ -180,4 +180,5 @@ namespace Rt2::Html
         _out.str("");
         return _data;
     }
+
 }  // namespace Rt2::Html

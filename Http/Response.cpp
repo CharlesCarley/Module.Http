@@ -19,9 +19,9 @@
   3. This notice may not be removed or altered from any source distribution.
 -------------------------------------------------------------------------------
 */
-#include "Response.h"
-#include "Common.h"
-#include "ContentType.h"
+#include "Http/Response.h"
+#include "Http/Common.h"
+#include "Http/ContentType.h"
 #include "Sockets/PlatformSocket.h"
 #include "Sockets/SocketStream.h"
 #include "Utils/Exception.h"

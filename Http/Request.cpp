@@ -67,7 +67,7 @@ namespace Rt2::Http
         {
             extractHeader(in);
 
-            Console::writeLine("Method: ", _method.string());
+            Console::writeLine("Method: ", _method.name());
             Console::writeLine("URL   : ", _url.value());
 
             // ignore the rest
@@ -78,7 +78,7 @@ namespace Rt2::Http
 
     void Request::write(OStream& out) const
     {
-        out << _method.string();
+        out << _method.name();
         out << ' ' << _url.value() << ' ' << "HTTP/1.1" << Eol;
     }
 

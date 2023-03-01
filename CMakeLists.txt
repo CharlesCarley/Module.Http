@@ -41,7 +41,10 @@ else()
     set(TargetGroup )
     set(TargetName Http)
     set(Http_INCLUDE  ${Http_SOURCE_DIR})
-    set(Http_LIBRARY  Http Html)
+    set(Http_LIBRARY  Http)
+
+    set(Html_INCLUDE  ${Http_SOURCE_DIR})
+    set(Html_LIBRARY  Html)
 endif()
 
 add_subdirectory(Http)

@@ -9,9 +9,9 @@
 #include "Sockets/SocketStream.h"
 #include "ThisDir.h"
 #include "Threads/Task.h"
+#include "Threads/Thread.h"
 #include "Utils/String.h"
 #include "gtest/gtest.h"
-#include "Threads/Thread.h"
 
 using namespace Rt2;
 
@@ -65,66 +65,33 @@ GTEST_TEST(Http, Uri_003)
     EXPECT_EQ(url.path(), "/foo");
 }
 
-void ExpectThrow(const std::function<void()> fn)
-{
-    try
-    {
-        fn();
-        FAIL();
-    }
-    catch (Exception&)
-    {
-        // empty
-    }
-}
-
-void ExpectNoThrow(const std::function<void()> fn)
-{
-    try
-    {
-        fn();
-    }
-    catch (Exception&)
-    {
-        FAIL();
-    }
-}
-
 GTEST_TEST(Http, Url_001)
-{ /*
-     ExpectThrow([]
-                 { Http::Url u("foo.com"); });
-     ExpectThrow([]
-                 { Http::Url u("file://"); });
-     ExpectThrow([]
-                 { Http::Url u("https://"); });
-     ExpectThrow([]
-                 { Http::Url u("http://foo-"); });
-     ExpectThrow([]
-                 { Http::Url u("http://foo-bar-"); });
-     ExpectThrow([]
-                 { Http::Url u("http://foo-bar-.com-:9876"); });
-     ExpectThrow([]
-                 { Http::Url u("http://foo-bar-"); });*/
-    ExpectNoThrow(
-        []
-        {
-            const Http::Url u("http://foo.bar:8080");
-            EXPECT_EQ(u.scheme(), "http");
-            EXPECT_EQ(u.authority(), "foo.bar");
-            EXPECT_EQ(u.port(), 8080);
-            EXPECT_EQ(u.path(), "/");
-        });
-    ExpectNoThrow(
-        []
-        {
-            const Http::Url u("http://foo.bar:8080/a/b/c/d");
+{
+    EXPECT_ANY_THROW({ Http::Url u("foo.com"); });
+    EXPECT_ANY_THROW({ Http::Url u("https://"); });
+    EXPECT_ANY_THROW({ Http::Url u("http://foo-"); });
+    EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-"); });
+    EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-.com-:9876"); });
+    EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-"); });
 
-            EXPECT_EQ(u.scheme(), "http");
-            EXPECT_EQ(u.authority(), "foo.bar");
-            EXPECT_EQ(u.port(), 8080);
-            EXPECT_EQ(u.path(), "/a/b/c/d");
-        });
+    EXPECT_NO_THROW({
+        Http::Url u("file://");
+    });
+    EXPECT_NO_THROW({
+        const Http::Url u("http://foo.bar:8080");
+        EXPECT_EQ(u.scheme(), "http");
+        EXPECT_EQ(u.authority(), "foo.bar");
+        EXPECT_EQ(u.port(), 8080);
+        EXPECT_EQ(u.path(), "/");
+    });
+    EXPECT_NO_THROW({
+        const Http::Url u("http://foo.bar:8080/a/b/c/d");
+
+        EXPECT_EQ(u.scheme(), "http");
+        EXPECT_EQ(u.authority(), "foo.bar");
+        EXPECT_EQ(u.port(), 8080);
+        EXPECT_EQ(u.path(), "/a/b/c/d");
+    });
 }
 
 GTEST_TEST(Http, Http_001)
@@ -133,42 +100,13 @@ GTEST_TEST(Http, Http_001)
     StringStream  ss;
     ss << "GET http://127.0.0.1/index.html HTTP/1.1\n";
     sc.read(ss);
-}
+    EXPECT_EQ(sc.method().type(), Http::Method::Get);
+    EXPECT_EQ(sc.method().name(), "GET");
 
-GTEST_TEST(Html, Html_001)
-{
-    class Listener final : public Http::RequestListener
-    {
-        bool _handled{false};
 
-    public:
-        void handle(const Http::Request& request,
-                    Http::Response&      response) override
-        {
-            response.writeNotFound();
-            _handled = true;
-        }
-
-        bool handled() const { return _handled; }
-    };
-
-    const Http::Url url("http://127.0.0.1:5000/");
-
-    Html::Server s;
-    Listener     l;
-    s.setListener(&l);
-    s.start(url.authority(), url.port());
-
-    if (const Sockets::ClientSocket socket(url.authority(), url.port());
-        socket.isOpen())
-    {
-        Http::Request req;
-        req.setMethod(Http::Method::Get);
-        req.setUrl(url);
-        socket.write(req.toString());
-    }
-    Threads::Thread::sleep(100);
-    //s.runSignaled();
-    s.exit();
-    EXPECT_TRUE(l.handled());
+    const Http::Url& v = sc.url();
+    EXPECT_EQ(v.scheme(), "http");
+    EXPECT_EQ(v.authority(), "127.0.0.1");
+    EXPECT_EQ(v.port(), 80);
+    EXPECT_EQ(v.path(), "/index.html");
 }

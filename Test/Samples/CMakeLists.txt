@@ -10,6 +10,7 @@ macro(make_exe TargetName)
 
     include_directories(
         ${Http_INCLUDE}
+        ${Html_INCLUDE}
         ${Sockets_INCLUDE}
         ${Utils_INCLUDE}
         ${Threads_INCLUDE}
@@ -18,6 +19,7 @@ macro(make_exe TargetName)
     add_executable(${TargetName} ${ARGN})
     target_link_libraries(
         ${TargetName} 
+        ${Html_LIBRARY}
         ${Http_LIBRARY}
         ${Sockets_LIBRARY}
         ${Utils_LIBRARY}
@@ -32,9 +34,8 @@ endmacro()
 
 set_group(Basic_SRC
     Source:Samp001.cpp
-    Site:Samp001/*.css
     Site:Samp001/*.html
-    Site:Samp001/*.svg
+    Site/css:Samp001/css/*.css
 )
 
 make_exe(Basic ${Basic_SRC})
