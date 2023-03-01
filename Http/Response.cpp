@@ -63,9 +63,6 @@ namespace Rt2::Http
         {
             OutputStringStream oss;
             Su::copy(oss, stream, false, false);
-            oss.put('\n');
-            oss.put('\n');
-
             Sockets::SocketOutputStream resp(_sock);
             writeCode(resp, 200);
             writeContent(resp, oss.str(), contentType);

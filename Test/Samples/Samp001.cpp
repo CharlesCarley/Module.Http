@@ -53,7 +53,7 @@ public:
 
 void go()
 {
-    const Http::Url url("http://192.168.1.118:8080");
+    const Http::Url url("http://127.0.0.1:8080");
     Html::Server s;
     s.setRoot(TestFile("Samp001"));
 
