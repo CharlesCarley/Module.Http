@@ -62,5 +62,7 @@ namespace Rt2::Http::Uri
         void parseImpl(IStream& is) override;
 
         void writeImpl(OStream& is, int format) override;
+
+        static bool isInvalidScheme(const String& scheme);
     };
 }  // namespace Rt2::Http::Uri

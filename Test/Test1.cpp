@@ -76,6 +76,8 @@ GTEST_TEST(Http, Url_001)
 
     EXPECT_NO_THROW({
         Http::Url u("file://");
+        EXPECT_EQ(u.scheme(), "file");
+        EXPECT_EQ(u.path(), "/");
     });
     EXPECT_NO_THROW({
         const Http::Url u("http://foo.bar:8080");
@@ -102,7 +104,6 @@ GTEST_TEST(Http, Http_001)
     sc.read(ss);
     EXPECT_EQ(sc.method().type(), Http::Method::Get);
     EXPECT_EQ(sc.method().name(), "GET");
-
 
     const Http::Url& v = sc.url();
     EXPECT_EQ(v.scheme(), "http");

@@ -34,7 +34,7 @@ namespace Rt2::Http
 
     void Url::setScheme(const String& scheme)
     {
-        if (scheme == "http")
+        if (!Uri::Parser::isInvalidScheme(scheme))
             _scheme = scheme;
     }
 

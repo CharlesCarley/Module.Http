@@ -42,16 +42,6 @@ namespace Rt2::Http::Uri
                d == TOK_SLASH;
     }
 
-    inline bool isInvalidValidScheme(const String& v)
-    {
-        for (const auto& [value, type, size] : ValidSchemes)
-        {
-            if (v == value)
-                return false;
-        }
-        return true;
-    }
-
     inline bool isDot(const I8 a,
                       const I8 b,
                       const I8 c)
@@ -108,7 +98,7 @@ namespace Rt2::Http::Uri
             error("expected a scheme declaration");
 
         const String& scheme = string(0);
-        if (isInvalidValidScheme(scheme))
+        if (isInvalidScheme(scheme))
             error("invalid scheme type: ", scheme);
 
         advanceCursor(4);
@@ -327,5 +317,15 @@ namespace Rt2::Http::Uri
 
     void Parser::writeImpl(OStream& is, int format)
     {
+    }
+
+    bool Parser::isInvalidScheme(const String& scheme)
+    {
+        for (const auto& [value, type, size] : ValidSchemes)
+        {
+            if (scheme == value)
+                return false;
+        }
+        return true;
     }
 }  // namespace Rt2::Http::Uri
