@@ -84,7 +84,6 @@ namespace Rt2::Html
                 SocketInputStream ss(sock);
                 request.read(ss);
 
-
                 Http::Response response(sock);
                 _requestListener->handle(request, response);
             }
@@ -92,8 +91,7 @@ namespace Rt2::Html
         }
         catch (Exception& ex)
         {
-            Console::setForeground(CS_RED);
-            Console::writeLine(ex.what());
+            Console::writeError(ex.what());
         }
     }
 

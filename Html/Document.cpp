@@ -20,16 +20,13 @@
 -------------------------------------------------------------------------------
 */
 #include "Html/Document.h"
-#include "Html/Command.h"
-#include "Utils/Char.h"
-#include "Utils/Path.h"
 #include "Utils/StreamMethods.h"
 #include "Utils/TextStreamWriter.h"
 
 namespace Rt2::Html
 {
 
-    String textSize(TextSize sz)
+    String textSize(const TextSize sz)
     {
         return Su::join("fs-", (int)sz);
     }
@@ -55,9 +52,7 @@ namespace Rt2::Html
         for (auto& ele : arr)
         {
             if (f)
-            {
                 f = false;
-            }
             else
                 str.push_back(' ');
             str.append(ele);
@@ -79,12 +74,12 @@ namespace Rt2::Html
 
     Document::~Document() = default;
 
-    void Document::set(TextAlignment al)
+    void Document::set(const TextAlignment al)
     {
         _style.push_back(textAlign(al));
     }
 
-    void Document::set(TextSize size)
+    void Document::set(const TextSize size)
     {
         _style.push_back(textSize(size));
     }
