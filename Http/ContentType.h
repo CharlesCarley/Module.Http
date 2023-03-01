@@ -37,6 +37,7 @@ namespace Rt2::Http
             TextPlain,
             TextJson,
             TextJs,
+            Icon,
             Undefined,
         };
 
@@ -58,6 +59,8 @@ namespace Rt2::Http
         {
             return _type;
         }
+
+        bool isPlainText() const;
 
         String string() const
         {

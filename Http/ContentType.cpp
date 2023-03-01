@@ -35,6 +35,7 @@ namespace Rt2::Http
         {              "text/plain",      ContentType::TextPlain, 10},
         {               "text/json",       ContentType::TextJson,  9},
         {         "text/javascript",         ContentType::TextJs, 15},
+        {            "image/x-icon",           ContentType::Icon, 12},
     };
 
     String ContentType::toString(I8 type)
@@ -47,6 +48,7 @@ namespace Rt2::Http
         case TextPlain:
         case TextJson:
         case TextJs:
+        case Icon:
             return ContentTypeValues[type].string();
         default:
             throw Exception("undefined Content type ", type);
@@ -74,6 +76,25 @@ namespace Rt2::Http
             return TextJs;
         if (str == ".map")
             return TextJs;
+        if (str == ".ico")
+            return Icon;
         return Undefined;
+    }
+
+    bool ContentType::isPlainText() const
+    {
+        switch (_type)
+        {
+        case TextHtml:
+        case TextCss:
+        case TextPlain:
+        case TextJson:
+        case TextJs:
+            return true;
+        default:
+        case AppOctetStream:
+        case Icon:
+            return false;
+        }
     }
 }  // namespace Rt2::Http

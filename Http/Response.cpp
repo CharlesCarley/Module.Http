@@ -41,7 +41,7 @@ namespace Rt2::Http
         try
         {
             OutputStringStream oss;
-            oss.write(data.c_str(), data.size());
+            oss.write(data.c_str(), (std::streamsize)data.size());
             oss.put('\n');
             oss.put('\n');
 
@@ -62,7 +62,8 @@ namespace Rt2::Http
         try
         {
             OutputStringStream oss;
-            Su::copy(oss, stream, false, false);
+
+            Su::copy(oss, stream, !contentType.isPlainText(), false);
             Sockets::SocketOutputStream resp(_sock);
             writeCode(resp, 200);
             writeContent(resp, oss.str(), contentType);

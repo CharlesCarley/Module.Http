@@ -38,5 +38,5 @@ set_group(Basic_SRC
     Site/css:Samp001/css/*.css
 )
 
-make_exe(Basic ${Basic_SRC})
+make_exe(HelloWorld ${Basic_SRC})
 

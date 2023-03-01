@@ -21,7 +21,9 @@ public:
         if (const Http::ContentType content(pu.lastExtension());
             content.type() != Http::ContentType::Undefined)
         {
-            if (InputFileStream ifs(Su::join(TestFile("Samp001/"), path));
+            if (InputFileStream ifs(Su::join(
+                    TestFile("Samp001/"),
+                    path));
                 ifs.is_open())
                 response.write(ifs, content.type());
             else
@@ -54,7 +56,7 @@ public:
 void go()
 {
     const Http::Url url("http://127.0.0.1:8080");
-    Html::Server s;
+    Html::Server    s;
     s.setRoot(TestFile("Samp001"));
 
     Response l;
@@ -70,7 +72,7 @@ int main(int, char**)
         go();
         return 0;
     }
-    catch (Exception &ex)
+    catch (Exception& ex)
     {
         Console::writeError(ex.what());
         return -5;
