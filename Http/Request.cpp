@@ -44,6 +44,7 @@ namespace Rt2::Http
     void Request::extractHeader(IStream& in)
     {
         // header <method> <relative-url> <version> CRLF
+
         String method;
         in >> method;
         if (!method.empty())
@@ -70,9 +71,12 @@ namespace Rt2::Http
             Console::writeLine("Method: ", _method.name());
             Console::writeLine("URL   : ", _url.value());
 
-            // ignore the rest
+            // ignore the rest for now
             while (!in.eof())
+            {
                 (void)in.get();
+                // Console::write("", (char)in.get());
+            }
         }
     }
 

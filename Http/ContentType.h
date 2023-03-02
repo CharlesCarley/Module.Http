@@ -38,6 +38,7 @@ namespace Rt2::Http
             TextJson,
             TextJs,
             Icon,
+            SvgXml,
             Undefined,
         };
 

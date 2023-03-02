@@ -15,20 +15,13 @@ private:
     PathUtil _curPath{CurrentSourceDirectory};
 
 public:
-    static void respondFile(const Http::Response& response, const String& path)
+    static void respondFile(const Http::Response&    response,
+                            const Http::ContentType& content,
+                            const String&            path)
     {
-        const PathUtil pu = PathUtil(path);
-        if (const Http::ContentType content(pu.lastExtension());
-            content.type() != Http::ContentType::Undefined)
-        {
-            if (InputFileStream ifs(Su::join(
-                    TestFile("Samp001/"),
-                    path));
-                ifs.is_open())
-                response.write(ifs, content.type());
-            else
-                response.writeNotFound();
-        }
+        if (InputFileStream ifs(Su::join(TestFile("Samp001/"), path));
+            ifs.is_open())
+            response.write(ifs, content.type());
         else
             response.writeNotFound();
     }
@@ -44,7 +37,7 @@ public:
 
             if (const Http::ContentType ct(PathUtil{path}.lastExtension());
                 ct.type() != Http::ContentType::Undefined)
-                respondFile(response, path);
+                respondFile(response, ct, path);
             else
                 response.writeNotFound();
         }

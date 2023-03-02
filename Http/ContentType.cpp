@@ -36,6 +36,7 @@ namespace Rt2::Http
         {               "text/json",       ContentType::TextJson,  9},
         {         "text/javascript",         ContentType::TextJs, 15},
         {            "image/x-icon",           ContentType::Icon, 12},
+        {           "image/svg+xml",         ContentType::SvgXml, 13},
     };
 
     String ContentType::toString(I8 type)
@@ -49,6 +50,7 @@ namespace Rt2::Http
         case TextJson:
         case TextJs:
         case Icon:
+        case SvgXml:
             return ContentTypeValues[type].string();
         default:
             throw Exception("undefined Content type ", type);
@@ -78,6 +80,8 @@ namespace Rt2::Http
             return TextJs;
         if (str == ".ico")
             return Icon;
+        if (str == ".svg")
+            return SvgXml;
         return Undefined;
     }
 
@@ -90,6 +94,7 @@ namespace Rt2::Http
         case TextPlain:
         case TextJson:
         case TextJs:
+        case SvgXml:
             return true;
         default:
         case AppOctetStream:

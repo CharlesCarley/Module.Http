@@ -105,7 +105,7 @@ namespace Rt2::Http
     void Response::writeContent(OStream& out, const String& content, const ContentType& contentType)
     {
         out << "Content-Type: " << contentType.string() << Eol;
-        out << "Content-Length: " << content.size() << Eol;
+        out << "Content-Length: " << content.size();
         out << Eol << Eol;
         out << content;
     }
