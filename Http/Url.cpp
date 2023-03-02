@@ -36,10 +36,17 @@ namespace Rt2::Http
     {
         if (!Uri::Parser::isInvalidScheme(scheme))
             _scheme = scheme;
+        else
+            throw Exception("invalid URL scheme: ", scheme);
     }
 
     void Url::setPath(const String& path)
     {
+        // Some assumed to be valid path (not tested to be valid here)
+        // with the form '/' <id[0]> '/' <id[n]>
+        // where the last element points to the resource.
+        // (Note: there is no max limit on the number of max separators)
+        // TODO: Limit the number of max separators
         if (!path.empty())
         {
             if (path[0] != '/')
@@ -51,21 +58,26 @@ namespace Rt2::Http
 
     void Url::setAuthority(const String& auth)
     {
-        // TODO: needs validated
+        // TODO: needs validated when set manually.
         _authority = auth;
     }
 
     void Url::setPort(const U16& port)
     {
-        // TODO: needs validated
         _port = port;
     }
 
     String Url::value() const
     {
-        String jr = Su::join(_scheme, ':', '/', '/', _authority, ':', _port, _path);
-        // TODO: needs validated
-        return jr;
+        // TODO: needs validated when set manually.
+
+        if (!_path.empty())
+        {
+            if (_path.front() != '/')
+                throw Exception("invalid path format");
+        }
+
+        return Su::join(_scheme, ':', '/', '/', _authority, ':', _port, _path);
     }
 
 }  // namespace Rt2::Http
