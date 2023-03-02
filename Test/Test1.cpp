@@ -65,15 +65,32 @@ GTEST_TEST(Http, Uri_003)
     EXPECT_EQ(url.path(), "/foo");
 }
 
+GTEST_TEST(Http, Uri_004)
+{
+    EXPECT_NO_THROW({
+        StringStream ss;
+        ss << "127.0.0.1:54321/foo";
+        Http::Uri::Parser p;
+        p.read(ss);
+        Http::Url url = p.url();
+
+        EXPECT_EQ(url.scheme(), "http");  // defaults to http
+        EXPECT_EQ(url.authority(), "127.0.0.1");
+        EXPECT_EQ(url.path(), "/foo");
+        EXPECT_EQ(url.port(), 54321);
+    });
+}
+
 GTEST_TEST(Http, Url_001)
 {
-    EXPECT_ANY_THROW({ Http::Url u("foo.com"); });
+
     EXPECT_ANY_THROW({ Http::Url u("https://"); });
     EXPECT_ANY_THROW({ Http::Url u("http://foo-"); });
     EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-"); });
     EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-.com-:9876"); });
     EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-"); });
 
+    EXPECT_NO_THROW({ Http::Url u("foo.com"); });
     EXPECT_NO_THROW({
         Http::Url u("file://");
         EXPECT_EQ(u.scheme(), "file");

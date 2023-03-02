@@ -90,18 +90,25 @@ namespace Rt2::Http::Uri
 
     void Parser::ruleAbsoluteUri()
     {
+        String scheme;
+
         const I8 t0 = token(0).type();
         const I8 t1 = token(1).type();
         const I8 t2 = token(2).type();
         if (const I8 t3 = token(3).type();
             !isScheme(t0, t1, t2, t3))
-            error("expected a scheme declaration");
+        {
+            // default to http
+            scheme = "http";
+        }
+        else
+        {
+            scheme = string(0);
+            if (isInvalidScheme(scheme))
+                error("invalid scheme type: ", scheme);
+            advanceCursor(4);
+        }
 
-        const String& scheme = string(0);
-        if (isInvalidScheme(scheme))
-            error("invalid scheme type: ", scheme);
-
-        advanceCursor(4);
         _url.setScheme(scheme);
 
         ruleOptionalUserPassword();
@@ -271,6 +278,11 @@ namespace Rt2::Http::Uri
                 error("port number is outside the range [0x00, 0xFFFF]");
             advanceCursor();
         }
+        else
+        {
+            // default to port 80
+            _url.setPort(80);
+        }
     }
 
     void Parser::ruleNetworkUri()
@@ -279,6 +291,11 @@ namespace Rt2::Http::Uri
 
     void Parser::ruleUri()
     {
+        // The first call in scan sets
+        // the state of the scanner.
+        if (tokenType(0) == TOK_EOF)
+            return;
+
         switch (const Scanner* sc = (Scanner*)_scanner;
                 sc->state())
         {
@@ -311,8 +328,13 @@ namespace Rt2::Http::Uri
     {
         _scanner->attach(&is);
 
-        while (token(0).type() != TOK_EOF)
-            ruleUri();
+        ruleUri();
+
+        // Make this work under the assumption that if
+        // any tokens remain after ruleUri returns then
+        // it's an error.
+        if (tokenType(0) != TOK_EOF)
+            error("expected the end of file token");
     }
 
     void Parser::writeImpl(OStream& is, int format)
