@@ -83,12 +83,13 @@ GTEST_TEST(Http, Uri_004)
 
 GTEST_TEST(Http, Url_001)
 {
-
     EXPECT_ANY_THROW({ Http::Url u("https://"); });
     EXPECT_ANY_THROW({ Http::Url u("http://foo-"); });
     EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-"); });
     EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-.com-:9876"); });
     EXPECT_ANY_THROW({ Http::Url u("http://foo-bar-"); });
+    EXPECT_ANY_THROW({ Http::Url u("http://foo:65536"); });
+    EXPECT_NO_THROW({ Http::Url u("http://foo:65535"); });
 
     EXPECT_NO_THROW({ Http::Url u("foo.com"); });
     EXPECT_NO_THROW({
@@ -105,7 +106,6 @@ GTEST_TEST(Http, Url_001)
     });
     EXPECT_NO_THROW({
         const Http::Url u("http://foo.bar:8080/a/b/c/d");
-
         EXPECT_EQ(u.scheme(), "http");
         EXPECT_EQ(u.authority(), "foo.bar");
         EXPECT_EQ(u.port(), 8080);
