@@ -57,6 +57,7 @@ namespace Rt2::Http::Uri
                a == TOK_DIGIT ||
                a == TOK_SLASH ||
                a == TOK_DOT ||
+               a == TOK_DASH ||
                a == TOK_UNDERSCORE;
     }
 

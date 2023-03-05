@@ -76,6 +76,8 @@ namespace Rt2::Http
             return TextCss;
         if (str == ".js")
             return TextJs;
+        if (str == ".txt")
+            return TextPlain;
         if (str == ".map")
             return TextJs;
         if (str == ".ico")

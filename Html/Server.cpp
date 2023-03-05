@@ -71,7 +71,6 @@ namespace Rt2::Html
         const ExitSignal sig;
         while (!sig.signaled())
             Threads::Thread::yield();
-        _srv->stop();
     }
 
     void Server::tryProcess(const Socket& sock) const
@@ -98,11 +97,7 @@ namespace Rt2::Html
     void Server::exit()
     {
         if (_srv)
-        {
             _srv->stop();
-            while (_srv->isValid())
-                Threads::Thread::sleep(1000);
-        }
         delete _srv;
         _srv = nullptr;
     }

@@ -32,6 +32,7 @@ namespace Rt2::Html
         AlignCenter,
         AlignEnd,
     };
+
     enum TextSize
     {
         ExtraLarge = 1,
@@ -40,62 +41,108 @@ namespace Rt2::Html
         Small      = 6,
     };
 
-    enum ColorIndex
+    enum BoxOp
     {
-        Color0 = 0,
-        Color1,
-        Color2,
-        Color3,
-        Color4,
-        Color5,
-        Color6,
-        Color7,
-        Color8,
-        Color9,
+        Left       = 0x01,
+        Top        = 0x02,
+        Right      = 0x04,
+        Bottom     = 0x08,
+        Horizontal = Left | Right,
+        Vertical   = Top | Bottom,
+        All        = Left | Top | Right | Bottom,
     };
 
     class Document
     {
     private:
-        int                _sectionCount{0};
         OutputStringStream _out;
         String             _data;
-        ColorIndex         _bg{Color0};
-        ColorIndex         _fg{Color9};
         StringArray        _style;
+
+        void tag(const String& tag, const String& text);
+
+        void linkRefTag(const String& tag, const String& text, const String& href);
+
+        void openTag(const String& tag);
+
+        void openRefTag(const String& tag, const String& href);
+
+        void refTag(const String& tag, const String& text, const String& href);
+
+        void closeTag(const String& tag);
 
     public:
         Document();
 
         ~Document();
 
-        void set(TextAlignment al);
-        void set(TextSize size);
+        void textAlign(TextAlignment al);
+
+        void fontSize(TextSize size);
+
+        void margin(BoxOp dir, int idx);
+
+        void padding(BoxOp dir, int idx);
+
+        void border(BoxOp dir, int idx);
+
+        void backgroundColor(int idx);
+
+        void borderColor(int idx);
+
+        void color(int idx);
+
         void set(const String& val);
 
         void beginDocument(const String& header);
 
         void endDocument(const String& footer);
 
-        void beginContainerDiv(bool stretch = true);
+        void display(const String& text, int idx);
 
+        void heading(const String& text, int idx);
+
+        void headingRef(const String& text, const String& ref, int idx);
+
+        void beginNav(const String& title, const String& home);
+
+        void beginNavList();
+
+        void navItem(const String& text);
+
+        void navItem(const String& text, const String& ref);
+
+        void beginGroupList();
+
+        void listGroupItem(const String& text);
+
+        void listGroupItem(const String& text, const String& ref);
+
+        void endNav();
+
+        void endList();
+
+        void beginContainerDiv(bool stretch = true);
 
         void beginDivRow(TextAlignment al = AlignStart);
 
         void beginDivCol(TextAlignment al = AlignStart);
 
+        void beginDiv();
+
         void endDiv();
-
-        void beginSection(const String& title);
-
-        void endSection();
 
         void br();
 
+        void begin();
+
+        void end();
+
+        void code(IStream& is);
+
         void paragraph(const String& text, TextSize size = Medium, TextAlignment al = AlignStart);
 
-        void setBackground(ColorIndex ci) { _bg = ci; }
-        void setForeground(ColorIndex ci) { _fg = ci; }
+        void textRef(const String& title, const String& ref, TextSize size = Medium, TextAlignment al = AlignStart);
 
         const String& flush();
     };

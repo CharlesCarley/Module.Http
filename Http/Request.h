@@ -45,6 +45,8 @@ namespace Rt2::Http
 
         const Url& url() const;
 
+        const String& path() const;
+
         const Method& method() const;
 
         void read(IStream& in);

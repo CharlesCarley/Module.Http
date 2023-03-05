@@ -15,6 +15,7 @@ private:
     PathUtil _curPath{CurrentSourceDirectory};
 
 public:
+
     static void respondFile(const Http::Response&    response,
                             const Http::ContentType& content,
                             const String&            path)

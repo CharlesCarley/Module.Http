@@ -41,6 +41,11 @@ namespace Rt2::Http
         _method = method;
     }
 
+    const String& Request::path() const
+    {
+        return _url.path();
+    }
+
     void Request::extractHeader(IStream& in)
     {
         // header <method> <relative-url> <version> CRLF
