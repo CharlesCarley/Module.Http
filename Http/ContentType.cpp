@@ -76,7 +76,7 @@ namespace Rt2::Http
             return TextCss;
         if (str == ".js")
             return TextJs;
-        if (str == ".txt")
+        if (str == ".txt" || str == ".md" || str == ".h" || str == ".cpp" || str == ".cmake")
             return TextPlain;
         if (str == ".map")
             return TextJs;

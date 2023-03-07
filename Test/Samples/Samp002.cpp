@@ -4,14 +4,17 @@
 #include "Http/Request.h"
 #include "Http/Response.h"
 #include "Http/Url.h"
+#include "Resource.h"
 #include "Utils/CommandLine/Parser.h"
 #include "Utils/Directory/Path.h"
 #include "Utils/Exception.h"
 #include "Utils/StreamMethods.h"
+#include "Utils/Time.h"
 #include "Utils/Win32/CrtUtils.h"
 
 namespace Rt2::HtmlSample
 {
+    using namespace Directory;
 
     enum Options
     {
@@ -27,136 +30,228 @@ namespace Rt2::HtmlSample
         {OP_BRO_ROOT, 0, "browse", "specify the root browser address", false, 1},
     };
 
-    class DirectoryPage
+    class DirectoryPage : public Html::Document
     {
     private:
-        Html::Document  _doc;
-        Directory::Path _root;
+        Path            _root;
         Http::Request   _request;
+        InputFileStream _curListing;
 
     public:
-        explicit DirectoryPage(const Directory::Path& root, const Http::Request& request) :
+        explicit DirectoryPage(const Path& root, const Http::Request& request) :
             _root(root),
             _request(request)
         {
         }
 
-        void writeTitle(const Directory::Path& path)
+        void logPath(const Path& path) const
         {
-            Directory::Path pth = path.relativeTo(_root);
+            Console::nl();
+            Console::setForeground(CS_GREY);
+            Console::write("", Tab(2), Hex(Time::now32()));
+            Console::setForeground(CS_CYAN);
+            Console::writeLine(" ", Tab(2), path.full());
+            Console::nl();
+        }
 
+        void navListItem(const String& name, const String& href) const
+        {
+            accent(0);
+            margin(Html::Horizontal, 1);
+            margin(Html::Vertical, 0);
+            navItem(name, href);
+            color(7);
+            margin(Html::Horizontal, 1);
+            margin(Html::Vertical, 0);
+            navItem("/");
+        }
+
+        void writeHeader(const Path& path) const
+        {
+            backgroundColor(-5);
+            beginHeader();
+            beginNav();
+
+            Path        pth  = path.relativeTo(_root);
             StringDeque dirs = path.directories();
 
-            _doc.backgroundColor(-1);
-            _doc.padding(Html::All, 1);
-            _doc.beginNav("Home", "/");
-            _doc.beginNavList();
-            _doc.margin(Html::Horizontal, 1);
-            _doc.navItem("/");
+            beginNavList();
+            navListItem("Home", "/");
 
             if (!dirs.empty())
             {
-                String acc = "/";
+                String href = "/";
                 while (!dirs.empty())
                 {
-                    String dir = dirs.front();
+                    const String& name = dirs.front();
+                    href               = Su::join(href, name, '/');
+                    navListItem(name, href);
                     dirs.pop_front();
-
-                    acc = Su::join(acc, dir, '/');
-
-                    _doc.margin(Html::Horizontal, 1);
-                    _doc.navItem(dir, acc);
-                    _doc.margin(Html::Horizontal, 1);
-                    _doc.navItem("/");
                 }
             }
-            _doc.endList();
-            _doc.endNav();
+
+            endList();
+            endNav();
+
+            backgroundColor(-4);
+            borderColor(0);
+            border(Html::Bottom, 1);
+            margin(Html::Bottom, 1);
+            beginDiv();
+            noSpacing();
+
+            color(9);
+            textAlign(Html::AlignCenter);
+
+            paragraph(
+                Su::join('~', path.full()));
+            endDiv();
+
+            endHeader();
         }
 
-        void
-        writeDirectory(const Directory::Path& path)
+        void writeSideBarList(const Path& path) const
         {
-            Console::nl();
-            Console::setForeground(CS_CYAN);
-            Console::writeLine("", Tab(2), path.full());
-            Console::nl();
-
-            _doc.beginDivRow();
-
-            _doc.beginDivCol();
-            if (path.isDirectory())
+            if (const Path dir = path.directoryAsPath();
+                dir.isDirectory())
             {
                 Directory::PathArray items;
-                path.list(items, true);
+                dir.list(items, true);
                 int i = 0;
 
                 if (!items.empty())
-                    _doc.beginGroupList();
+                    beginGroupList();
 
-                for (const Directory::Path& item : items)
+                for (const Path& item : items)
                 {
-                    Directory::Path local = item.relativeTo(_root);
-
-                    if (!item.isDotDirectory() && !item.isSymLink())
+                    if (Path local = item.relativeTo(_root);
+                        !local.isDotDirectory() &&
+                        !item.isSymLink())
                     {
                         if (++i % 2)
-                            _doc.backgroundColor(0);
+                            backgroundColor(-4);
                         else
-                            _doc.backgroundColor(1);
+                            backgroundColor(-2);
 
-                        _doc.borderColor(1);
+                        borderColor(-2);
+
                         if (item.isDirectory())
-                            _doc.listGroupItem(local.lastDirectory(), local.full());
+                            listGroupItem(local.lastDirectory(), local.full());
                         else if (item.isFile())
-                            _doc.listGroupItem(local.base(), local.full());
+                            listGroupItem(local.base(), local.full());
                     }
                 }
                 if (!items.empty())
-                    _doc.endList();
+                    endList();
+            }
+        }
+
+        void writeSideBar(const Path& path) const
+        {
+            beginDivCol(Html::BreakSmall, 3);
+            beginAside();
+            writeSideBarList(path);
+            endAside();
+            endDiv();
+        }
+
+        void writeContent(const Path& path)
+        {
+            beginDivCol();
+            beginMain();
+            drawListing(path);
+            endMain();
+            endDiv();
+        }
+
+        void drawListing(const Path& path)
+        {
+            if (const Http::ContentType content(path.extension());
+                content.isPlainText())
+            {
+                if (_curListing.is_open())
+                    _curListing.close();
+
+                if (path.open(_curListing))
+                {
+                    code(_curListing);
+                    _curListing.close();
+                }
+                else
+                {
+                    backgroundColor(-5);
+                    beginContainerDiv(true);
+                    endDiv();
+                }
             }
             else
             {
-                InputFileStream is;
-                if (path.open(is))
-                    _doc.code(is);
+                if (path.open(_curListing, true))
+                {
+                    OutputStringStream oss;
+                    Su::copy(oss, _curListing, true);
+
+                    OutputStringStream hex;
+                    Console::hexdump(hex, oss.str().data(), (uint32_t)oss.str().size());
+
+                    code(hex.str());
+                    _curListing.close();
+                }
+                else
+                {
+                    backgroundColor(-5);
+                    beginContainerDiv(true);
+                    endDiv();
+                }
             }
-            _doc.endDiv();
+        }
 
-            _doc.beginDivCol();
-            _doc.endDiv();
-
-            _doc.endDiv();
+        void writeFooter(const Path& path) const
+        {
+            beginFooter();
+            endFooter();
         }
 
         void render(const Http::Response& response)
         {
-            const Directory::Path current(_request.path());
+            const Path current(_request.path());
+            const Path full = _root.append(current);
+            logPath(full);
 
-            _doc.begin();
-            writeTitle(current);
+            String css;
+            Resource::getSite(css);
+            beginDoc(css);
 
-            _doc.beginContainerDiv(true);
+            overflow(Html::OverFlowHide);
+            writeHeader(current);
 
-            _doc.color(9);
-            _doc.backgroundColor(0);
-            _doc.margin(Html::Top, 2);
-            _doc.padding(Html::All, 0);
-            _doc.heading(Su::join("Index of ", '~', _request.path()), 5);
-            writeDirectory(_root.append(current));
+            noSpacing();
+            overflow(Html::OverFlowHide);
+            beginContainerDiv(true);
+            beginDivRow();
 
-            _doc.endDiv();
-            _doc.end();
-            response.write(_doc.flush(), Http::ContentType::TextHtml);
+            overflow(Html::OverFlowY);
+            writeSideBar(full);
+
+            overflow(Html::OverFlowY);
+            writeContent(full);
+
+            endDiv();
+            endDiv();
+            overflow(Html::OverFlowHide);
+            writeFooter(current);
+
+            endDoc();
+            response.write(flush(), Http::ContentType::TextHtml);
         }
     };
 
     class App final : public Http::RequestListener
     {
     private:
-        Http::Url       _url{};
-        Directory::Path _root;
-        Directory::Path _browse;
+        Http::Url _url{};
+        Path      _root;
+        Path      _browse;
 
     public:
         bool parse(const int argc, char** argv)
@@ -177,13 +272,13 @@ namespace Rt2::HtmlSample
             String path = p.string(OP_ROOT);
             if (!Su::endsWith(path, '/'))
                 path.push_back('/');
-            _root = Directory::Path{path};
+            _root = Path{path};
 
             path = p.string(OP_BRO_ROOT);
             if (!Su::endsWith(path, '/'))
                 path.push_back('/');
 
-            _browse = Directory::Path{path};
+            _browse = Path{path};
 
             Console::writeLine(
                 "Server Starting : ",
@@ -197,10 +292,12 @@ namespace Rt2::HtmlSample
         void handle(const Http::Request& request,
                     Http::Response&      response) override
         {
-            if (Directory::Path rp = _root.append(request.path());
+            if (const Path rp =
+                    _root.append(request.path());
                 rp.base() == "site.css")
             {
-                if (InputFileStream ifs; rp.open(ifs))
+                if (InputFileStream ifs;
+                    rp.open(ifs))
                     response.write(ifs, Http::ContentType::TextCss);
             }
             else

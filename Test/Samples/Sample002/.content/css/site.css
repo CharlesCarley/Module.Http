@@ -1,10 +1,14 @@
 :root {
-    --dg-0: #222;
+    --dg-4: #222222;
+    --dg-3: #262626;
+    --dg-2: #2a2a2a;
+    --dg-1: #2e2e2e;
+    --dg-0: #323232;
     /**/
     --bg-0: #333;
     --bg-1: #383838;
     --bg-2: #444;
-    --bg-3: #48484;
+    --bg-3: #484848;
     --bg-4: #8f8f8f;
     --bg-5: #737373;
     --bg-6: #575757;
@@ -24,20 +28,55 @@
     --fg-0: #A7A7A7;
     /**/
     --a-0: #509BD2;
-    --a-1: #50D29B;
-    --a-2: #D29B50;
+    --a-1: #d25084;
+    --a-2: #84d250;
 }
 
 body {
-    background: var(--bg-0);
-    color: var(--fg-0);
     padding: 0;
     margin: 0;
+    background-color: var(--dg-4);
 }
 
 a {
     text-decoration: none;
-    color: var(--a-0);
+}
+
+.l1 {
+    display: flex;
+    flex-direction: column;
+    min-height: 15%;
+}
+
+.l0 {
+    flex-grow: 1;
+}
+
+.of-0 {
+    overflow: hidden;
+}
+
+.of-1 {
+    overflow: auto;
+}
+
+.of-x {
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+
+.of-y {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+
+.fa-2 {
+    color: var(--fg-2);
+}
+
+.fa-1 {
+    color: var(--fg-0);
 }
 
 .fa0 {
@@ -52,34 +91,38 @@ a {
     color: var(--a-2);
 }
 
-.bc-0
-{
+.bc-0 {
     border-color: var(--bg-0)
 }
+
 .bc-1 {
     border-color: var(--bg-1)
 }
+
 .bc-2 {
     border-color: var(--bg-2)
 }
+
 .bc-3 {
     border-color: var(--bg-3)
 }
+
 .bc-4 {
     border-color: var(--bg-4)
 }
-.bc-5 {
-    border-color: var(--bg-5)
-}
+
 .bc-6 {
     border-color: var(--bg-6)
 }
+
 .bc-7 {
     border-color: var(--bg-7)
 }
+
 .bc-8 {
     border-color: var(--bg-8)
 }
+
 .bc-9 {
     border-color: var(--bg-9)
 }
@@ -99,6 +142,24 @@ a {
 .b-1 {
     background-color: var(--dg-0);
 }
+
+.b-2 {
+    background-color: var(--dg-1);
+}
+
+.b-3 {
+    background-color: var(--dg-2);
+}
+
+.b-4 {
+    background-color: var(--dg-3);
+}
+
+.b-5 {
+    background-color: var(--dg-4);
+}
+
+
 
 .b0 {
     background-color: var(--bg-0);

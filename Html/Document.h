@@ -20,7 +20,7 @@
 -------------------------------------------------------------------------------
 */
 #pragma once
-#include "Utils/Definitions.h"
+#include <stack>
 #include "Utils/FileSystem.h"
 #include "Utils/String.h"
 
@@ -33,12 +33,30 @@ namespace Rt2::Html
         AlignEnd,
     };
 
+    enum BreakSize
+    {
+        BreakNone,
+        BreakSmall,
+        BreakMedium,
+        BreakLarge,
+        BreakExtraLarge,
+        BreakFlex,
+
+    };
+
     enum TextSize
     {
         ExtraLarge = 1,
         Large      = 2,
         Medium     = 5,
         Small      = 6,
+    };
+
+    enum Direction
+    {
+        X_AXIS,
+        Y_AXIS,
+
     };
 
     enum BoxOp
@@ -52,97 +70,161 @@ namespace Rt2::Html
         All        = Left | Top | Right | Bottom,
     };
 
+    enum OverFlow
+    {
+        OverFlowNone,
+        OverFlowHide,
+        OverFlowAny,
+        OverFlowX,
+        OverFlowY,
+    };
+
+    struct StyleData
+    {
+        StringArray style;
+        StringMap   attrs;
+        String      id;
+        String      accent;
+        void        clear();
+    };
+
+    using StyleStack = std::stack<StyleData>;
+
     class Document
     {
     private:
-        OutputStringStream _out;
-        String             _data;
-        StringArray        _style;
+        mutable OutputStringStream _out;
+        String                     _data;
+        mutable StyleStack         _stack;
 
-        void tag(const String& tag, const String& text);
+        void tag(const String& tag, const String& text) const;
 
-        void linkRefTag(const String& tag, const String& text, const String& href);
+        void linkRefTag(const String& tag, const String& text, const String& href) const;
 
-        void openTag(const String& tag);
+        void openTag(const String& tag) const;
 
-        void openRefTag(const String& tag, const String& href);
+        void openRefTag(const String& tag, const String& href) const;
 
-        void refTag(const String& tag, const String& text, const String& href);
+        void refTag(const String& tag, const String& text, const String& href) const;
 
-        void closeTag(const String& tag);
+        void closeTag(const String& tag) const;
+
+        StyleData& top() const;
 
     public:
         Document();
 
         ~Document();
 
-        void textAlign(TextAlignment al);
+        void textAlign(TextAlignment al) const;
 
-        void fontSize(TextSize size);
+        void fontSize(TextSize size) const;
 
-        void margin(BoxOp dir, int idx);
+        void margin(BoxOp dir, int idx) const;
 
-        void padding(BoxOp dir, int idx);
+        void gutter(BoxOp dir, int idx) const;
 
-        void border(BoxOp dir, int idx);
+        void padding(BoxOp dir, int idx) const;
 
-        void backgroundColor(int idx);
+        void border(BoxOp dir, int idx) const;
 
-        void borderColor(int idx);
+        void backgroundColor(int idx) const;
 
-        void color(int idx);
+        void borderColor(int idx) const;
 
-        void set(const String& val);
+        void color(int idx) const;
 
-        void beginDocument(const String& header);
+        void accent(int idx) const;
 
-        void endDocument(const String& footer);
+        void id(const String& val) const;
 
-        void display(const String& text, int idx);
+        void set(const String& val) const;
 
-        void heading(const String& text, int idx);
+        void beginDocument(const String& header) const;
 
-        void headingRef(const String& text, const String& ref, int idx);
+        void endDocument(const String& footer) const;
 
-        void beginNav(const String& title, const String& home);
+        void display(const String& text, int idx) const;
 
-        void beginNavList();
+        void heading(const String& text, int idx) const;
 
-        void navItem(const String& text);
+        void headingRef(const String& text, const String& ref, int idx) const;
 
-        void navItem(const String& text, const String& ref);
+        void beginNav() const;
 
-        void beginGroupList();
+        void beginNavList() const;
 
-        void listGroupItem(const String& text);
+        void navItem(const String& text) const;
 
-        void listGroupItem(const String& text, const String& ref);
+        void navItem(const String& text, const String& ref) const;
 
-        void endNav();
+        void beginGroupList() const;
 
-        void endList();
+        void save() const;
 
-        void beginContainerDiv(bool stretch = true);
+        void copy() const;
 
-        void beginDivRow(TextAlignment al = AlignStart);
+        void restore() const;
 
-        void beginDivCol(TextAlignment al = AlignStart);
+        void listGroupItem(const String& text) const;
 
-        void beginDiv();
+        void listGroupItem(const String& text, const String& ref) const;
 
-        void endDiv();
+        void endNav() const;
 
-        void br();
+        void endList() const;
 
-        void begin();
+        void beginHeader() const;
 
-        void end();
+        void endHeader() const;
 
-        void code(IStream& is);
+        void beginAside() const;
 
-        void paragraph(const String& text, TextSize size = Medium, TextAlignment al = AlignStart);
+        void endAside() const;
 
-        void textRef(const String& title, const String& ref, TextSize size = Medium, TextAlignment al = AlignStart);
+        void beginMain() const;
+
+        void endMain() const;
+
+        void beginFooter() const;
+
+        void endFooter() const;
+
+        void flex() const;
+
+        void beginContainerDiv(bool stretch = true) const;
+
+        void beginDivRow(BreakSize br = BreakNone, int idx = 0) const;
+
+        void beginDivCol(BreakSize br = BreakNone, int idx = 0) const;
+
+        void beginDiv() const;
+
+        void endDiv() const;
+
+        void br() const;
+
+        void beginDoc(const String& style) const;
+
+        void endDoc() const;
+
+        void noSpacing() const;
+
+        void overflow(OverFlow v) const;
+
+        void attr(const String& key, const String& val) const;
+
+        void code(IStream& is) const;
+
+        void code(const String& str) const;
+
+        void paragraph(const String& text) const;
+
+        void textRef(const String& title, const String& ref, TextSize size = Medium, TextAlignment al = AlignStart) const;
+
+        void beginTag(const String& tag) const;
+
+        void endTag(const String& tag) const;
 
         const String& flush();
     };

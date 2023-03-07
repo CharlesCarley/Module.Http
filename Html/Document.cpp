@@ -20,6 +20,7 @@
 -------------------------------------------------------------------------------
 */
 #include "Html/Document.h"
+#include "Test/Samples/Resource.h"
 #include "Utils/Char.h"
 #include "Utils/StreamMethods.h"
 #include "Utils/TextStreamWriter.h"
@@ -27,8 +28,12 @@
 namespace Rt2::Html
 {
     using C = AttrString;
+    using M = AttributeMap;
 
-    Document::Document() = default;
+    Document::Document()
+    {
+        save();
+    }
 
     Document::~Document() = default;
 
@@ -72,6 +77,15 @@ namespace Rt2::Html
         return attr;
     }
 
+    String faOp(const int idx)
+    {
+        String attr;
+        attr.push_back('f');
+        attr.push_back('a');
+        attr.append(Char::toString(idx));
+        return attr;
+    }
+
     String displayOp(const int sz)
     {
         String attr;
@@ -97,9 +111,9 @@ namespace Rt2::Html
         case Top:
             return Su::join(st, "t-", idx);
         case Left:
-            return Su::join(st, "l-", idx);
+            return Su::join(st, "s-", idx);
         case Right:
-            return Su::join(st, "r-", idx);
+            return Su::join(st, "e-", idx);
         case Bottom:
             return Su::join(st, "b-", idx);
         case Horizontal:
@@ -149,6 +163,44 @@ namespace Rt2::Html
         return r;
     }
 
+    String breakOp(const String& type, const BreakSize br, int idx)
+    {
+        switch (br)
+        {
+        case BreakFlex:
+            return Su::join(type, "-flex");
+        case BreakSmall:
+            return Su::join(type, "-sm-", idx);
+        case BreakMedium:
+            return Su::join(type, "-md-", idx);
+        case BreakLarge:
+            return Su::join(type, "-lg-", idx);
+        case BreakExtraLarge:
+            return Su::join(type, "-xl-", idx);
+        case BreakNone:
+        default:
+            return type;
+        }
+    }
+
+    String overflowOp(OverFlow op)
+    {
+        switch (op)
+        {
+        case OverFlowHide:
+            return "of-0";
+        case OverFlowAny:
+            return "of-1";
+        case OverFlowX:
+            return "of-x";
+        case OverFlowY:
+            return "of-y";
+        case OverFlowNone:
+        default:
+            return "";
+        }
+    }
+
     String opArray(StringArray& arr)
     {
         bool   first = true;
@@ -168,61 +220,71 @@ namespace Rt2::Html
         return str;
     }
 
-    void Document::textAlign(const TextAlignment al)
+    void Document::textAlign(const TextAlignment al) const
     {
-        _style.push_back(textAlignOp(al));
+        top().style.push_back(textAlignOp(al));
     }
 
-    void Document::fontSize(const TextSize size)
+    void Document::fontSize(const TextSize size) const
     {
-        _style.push_back(textSizeOp(size));
+        top().style.push_back(textSizeOp(size));
     }
 
-    void Document::margin(const BoxOp dir, const int idx)
+    void Document::margin(const BoxOp dir, const int idx) const
     {
-        _style.push_back(spaceOp(dir, 'm', idx));
+        top().style.push_back(spaceOp(dir, 'm', idx));
     }
 
-    void Document::padding(const BoxOp dir, const int idx)
+    void Document::gutter(BoxOp dir, int idx) const
     {
-        _style.push_back(spaceOp(dir, 'p', idx));
+        top().style.push_back(spaceOp(dir, 'g', idx));
     }
 
-    void Document::set(const String& val)
+    void Document::padding(const BoxOp dir, const int idx) const
     {
-        _style.push_back(val);
+        top().style.push_back(spaceOp(dir, 'p', idx));
     }
 
-    void Document::beginDocument(const String& header)
+    void Document::set(const String& val) const
+    {
+        top().style.push_back(val);
+    }
+
+    void Document::beginDocument(const String& header) const
     {
         if (InputFileStream ifs(header);
             ifs.is_open())
             Su::copy(_out, ifs, false, false);
     }
 
-    void Document::endDocument(const String& footer)
+    void Document::endDocument(const String& footer) const
     {
         if (InputFileStream ifs(footer);
             ifs.is_open())
             Su::copy(_out, ifs, false, false);
     }
 
-    void Document::begin()
+    void Document::beginDoc(const String& style) const
     {
         Ts::print(_out, "<!DOCTYPE html>");
-        Ts::print(_out, R"(<html lang="en-us">)");
+        Ts::print(_out, R"(<html lang="en-us" data-bs-theme="dark">)");
         Ts::print(_out, R"(<head>)");
         Ts::print(_out, R"(<meta name="viewport" content="width=device-width, initial-scale=1">)");
         Ts::print(_out, R"(<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css")"
                         R"( rel="stylesheet")"
                         R"( integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD")"
                         R"( crossorigin="anonymous">)");
-        Ts::print(_out, R"(<link href="/.content/css/site.css" rel="stylesheet">)");
+
+        save();
+        if (!style.empty())
+            tag("style", style);
         Ts::print(_out, R"(</head>)");
-        Ts::print(_out, R"(<body>)");
+        restore();
+
+        openTag("body");
     }
 
-    void Document::end()
+    void Document::endDoc() const
     {
         Ts::print(_out, R"(<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js")"
                         R"( integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN")"
@@ -231,210 +293,335 @@ namespace Rt2::Html
         Ts::print(_out, R"(</html>)");
     }
 
-    void Document::openTag(const String& tag)
+    void Document::noSpacing() const
     {
-        Ts::print(_out, '<', tag, C("class", opArray(_style)), '>');
+        set("m-0 p-0");
     }
 
-    void Document::openRefTag(const String& tag, const String& href)
+    void Document::overflow(const OverFlow v) const
     {
-        Ts::print(_out, '<', tag, C("class", opArray(_style)), C("href", href), '>');
+        set(overflowOp(v));
+    }
+
+    void Document::attr(const String& key, const String& val) const
+    {
+        if (top().attrs.find(key) == top().attrs.end())
+            top().attrs[key] = val;
+    }
+
+    void Document::openTag(const String& tag) const
+    {
+        Ts::print(_out,
+                  '<',
+                  tag,
+                  ' ',
+                  C("class", opArray(top().style)),
+                  ' ',
+                  C("id", top().id),
+                  ' ',
+                  M(top().attrs),
+                  '>');
+        top().clear();
+    }
+
+    void Document::openRefTag(const String& tag, const String& href) const
+    {
+        Ts::print(_out,
+                  '<',
+                  tag,
+                  ' ',
+                  C("class", opArray(top().style)),
+                  ' ',
+                  C("id", top().id),
+                  ' ',
+                  M(top().attrs),
+                  ' ',
+                  C("href", href),
+                  '>');
+        top().clear();
     }
 
     void Document::refTag(const String& tag,
                           const String& text,
-                          const String& href)
+                          const String& href) const
     {
         openRefTag(tag, href);
         Ts::print(_out, text);
         closeTag(tag);
     }
 
-    void Document::closeTag(const String& tag)
+    void Document::closeTag(const String& tag) const
     {
         Ts::print(_out, '<', '/', tag, '>');
     }
 
+    StyleData& Document::top() const
+    {
+        return _stack.top();
+    }
+
+    void StyleData::clear()
+    {
+        style.clear();
+        attrs.clear();
+        id.clear();
+    }
+
     void Document::tag(const String& tag,
-                       const String& text)
+                       const String& text) const
     {
         openTag(tag);
         Ts::print(_out, text);
         closeTag(tag);
     }
 
-    void Document::linkRefTag(const String& tag, const String& text, const String& href)
+    void Document::linkRefTag(const String& tag, const String& text, const String& href) const
     {
         openTag(tag);
+        set(top().accent);
         refTag("a", text, href);
         closeTag(tag);
     }
 
-    void Document::br()
+    void Document::br() const
     {
         Ts::print(_out, "<br/>");
     }
 
-    void Document::display(const String& text, const int idx)
+    void Document::display(const String& text, const int idx) const
     {
-        _style.push_back(displayOp(idx));
+        top().style.push_back(displayOp(idx));
         tag("p", text);
     }
 
-    void Document::heading(const String& text, const int idx)
+    void Document::heading(const String& text, const int idx) const
     {
-        _style.push_back(headingOp(idx));
+        top().style.push_back(headingOp(idx));
         tag("p", text);
     }
 
-    void Document::headingRef(const String& text, const String& ref, const int idx)
+    void Document::headingRef(const String& text, const String& ref, const int idx) const
     {
-        _style.push_back(headingOp(idx));
+        top().style.push_back(headingOp(idx));
         refTag("a", text, ref);
     }
 
-    void Document::beginNav(const String& title, const String& home)
+    void Document::beginNav() const
     {
-        const StringArray tmp = _style;
-        _style.clear();
-
-        padding(All, 0);
-        margin(All, 0);
-        set("navbar navbar-expand-lg");
+        set("navbar navbar-expand");
         openTag("nav");
 
-        _style = tmp;
         set("collapse navbar-collapse");
         openTag("div");
-
-        margin(Left, 2);
-        set("fa0");
-        refTag("a", title, home);
     }
 
-    void Document::beginNavList()
+    void Document::endNav() const
     {
+        closeTag("div");
+        closeTag("nav");
+    }
+
+    void Document::beginNavList() const
+    {
+        padding(All, 1);
         set("navbar-nav");
         openTag("ul");
+        margin(Left, 1);
     }
 
-    void Document::navItem(const String& text)
+    void Document::navItem(const String& text) const
     {
         set("nav-item");
         tag("li", text);
     }
 
-    void Document::navItem(const String& text, const String& ref)
+    void Document::navItem(const String& text, const String& ref) const
     {
         set("nav-item");
         linkRefTag("li", text, ref);
     }
 
-    void Document::beginGroupList()
+    void Document::beginGroupList() const
     {
         set("list-group list-group-flush");
         openTag("ul");
     }
 
-    void Document::listGroupItem(const String& text)
+    void Document::save() const
+    {
+        _stack.push({});
+    }
+
+    void Document::copy() const
+    {
+        _stack.push(top());
+    }
+
+    void Document::restore() const
+    {
+        if (_stack.size() > 1)
+            _stack.pop();
+    }
+
+    void Document::listGroupItem(const String& text) const
     {
         set("list-group-item");
         tag("li", text);
     }
 
-    void Document::listGroupItem(const String& text, const String& ref)
+    void Document::listGroupItem(const String& text, const String& ref) const
     {
         set("list-group-item");
         linkRefTag("li", text, ref);
     }
 
-    void Document::endList()
+    void Document::endList() const
     {
         closeTag("ul");
     }
 
-    void Document::endNav()
+    void Document::beginHeader() const
+    {
+        set("sticky-top");
+        openTag("header");
+    }
+
+    void Document::endHeader() const
+    {
+        closeTag("header");
+    }
+
+    void Document::beginAside() const
+    {
+        openTag("aside");
+    }
+
+    void Document::endAside() const
+    {
+        closeTag("aside");
+    }
+
+    void Document::beginMain() const
+    {
+        openTag("main");
+    }
+
+    void Document::flex() const
+    {
+        set("d-flex");
+    }
+
+    void Document::endMain() const
+    {
+        closeTag("main");
+    }
+
+    void Document::beginFooter() const
+    {
+        openTag("footer");
+    }
+
+    void Document::endFooter() const
+    {
+        closeTag("footer");
+    }
+
+    void Document::border(const BoxOp dir, const int idx) const
+    {
+        top().style.push_back(borderOp(dir, idx));
+    }
+
+    void Document::backgroundColor(const int idx) const
+    {
+        top().style.push_back(bgOp(idx));
+    }
+
+    void Document::borderColor(const int idx) const
+    {
+        top().style.push_back(borderColorOp(idx));
+    }
+
+    void Document::color(const int idx) const
+    {
+        top().style.push_back(fgOp(idx));
+    }
+
+    void Document::accent(const int idx) const
+    {
+        top().accent = faOp(idx);
+    }
+
+    void Document::id(const String& val) const
+    {
+        top().id = val;
+    }
+
+    void Document::beginContainerDiv(const bool stretch) const
+    {
+        top().style.push_back(stretch ? "container-fluid" : "container");
+        openTag("div");
+    }
+
+    void Document::beginDivRow(const BreakSize br,
+                               const int       idx) const
+    {
+        top().style.push_back(breakOp("row", br, idx));
+        openTag("div");
+    }
+
+    void Document::beginDivCol(const BreakSize br,
+                               const int       idx) const
+    {
+        top().style.push_back(breakOp("col", br, idx));
+        openTag("div");
+    }
+
+    void Document::beginDiv() const
+    {
+        openTag("div");
+    }
+
+    void Document::endDiv() const
     {
         closeTag("div");
-        endList();
-        closeTag("nav");
     }
 
-    void Document::border(const BoxOp dir, const int idx)
+    void Document::paragraph(const String& text) const
     {
-        _style.push_back(borderOp(dir, idx));
-    }
-
-    void Document::backgroundColor(const int idx)
-    {
-        _style.push_back(bgOp(idx));
-    }
-
-    void Document::borderColor(const int idx)
-    {
-        _style.push_back(borderColorOp(idx));
-    }
-
-    void Document::color(const int idx)
-    {
-        _style.push_back(fgOp(idx));
-    }
-
-    void Document::beginContainerDiv(const bool stretch)
-    {
-        _style.push_back(stretch ? "container-fluid" : "container");
-        openTag("div");
-    }
-
-    void Document::beginDivRow(const TextAlignment al)
-    {
-        _style.push_back("row");
-        openTag("div");
-    }
-
-    void Document::beginDivCol(const TextAlignment al)
-    {
-        _style.push_back("col");
-        openTag("div");
-    }
-
-    void Document::beginDiv()
-    {
-        openTag("div");
-    }
-
-    void Document::endDiv()
-    {
-        closeTag("div");
-    }
-
-    void Document::paragraph(const String&       text,
-                             const TextSize      size,
-                             const TextAlignment al)
-    {
-        _style.push_back(textSizeOp(size));
-        _style.push_back(textAlignOp(al));
-
         tag("p", text);
     }
 
-    void Document::code(IStream& is)
+    void Document::code(IStream& is) const
     {
         OutputStringStream oss;
         Su::copy(oss, is, false);
-
         tag("pre", oss.str());
+    }
+
+    void Document::code(const String& str) const
+    {
+        tag("pre", str);
     }
 
     void Document::textRef(const String&       title,
                            const String&       ref,
                            const TextSize      size,
-                           const TextAlignment al)
+                           const TextAlignment al) const
     {
-        _style.push_back(textSizeOp(size));
-        _style.push_back(textAlignOp(al));
+        top().style.push_back(textSizeOp(size));
+        top().style.push_back(textAlignOp(al));
 
         refTag("a", title, ref);
+    }
+
+    void Document::beginTag(const String& tag) const
+    {
+        openTag(tag);
+    }
+
+    void Document::endTag(const String& tag) const
+    {
+        closeTag(tag);
     }
 
     const String& Document::flush()

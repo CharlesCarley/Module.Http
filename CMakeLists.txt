@@ -18,6 +18,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH 
   ${Http_SOURCE_DIR}/CMake 
   ${Http_SOURCE_DIR}/CMake/Modules
+  ${Http_SOURCE_DIR}/Internal/ResourceCompiler/Source/CMake
 )
 include(Configure)
 if (NOT Configure_SUCCEEDED)
@@ -36,6 +37,7 @@ else()
     add_subdirectory(Internal/ParserBase)
     add_subdirectory(Internal/Threads)
     add_subdirectory(Internal/Sockets)
+    add_subdirectory(Internal/ResourceCompiler)
 
     set(TargetFolders TRUE)
     set(TargetGroup )

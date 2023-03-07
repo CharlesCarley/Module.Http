@@ -46,14 +46,17 @@ set_group(Sample_01_SRC
 )
 make_exe(Sample_01 ${Sample_01_SRC})
 
+include(ResourceCompiler)
+add_text_resources(Sample_02_RES Resource "Rt2::HtmlSample" 
+    Sample002/.content/css/site.min.css)
 
 set_group(Sample_02_SRC
     Source:Samp002.cpp
     Site:Sample002/*.html
     Site/css:Sample002/.content/css/*.css
 )
-make_exe(Sample_02 ${Sample_02_SRC})
+make_exe(Sample_02 ${Sample_02_SRC} ${Sample_02_RES})
 target_debug(Sample_02 
     ${CMAKE_CURRENT_SOURCE_DIR}
-    "--host 127.0.0.1:5000 --root ${CMAKE_CURRENT_SOURCE_DIR}/Sample002/ --browse F://Internal/"
+    "--host 127.0.0.1:5000 --root ${CMAKE_CURRENT_SOURCE_DIR}/Sample002/ --browse F:/Internal/"
 )

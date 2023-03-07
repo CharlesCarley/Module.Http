@@ -66,6 +66,16 @@ DefineExternalTargetEx(
 
 
 DefineExternalTargetEx(
+    ResourceCompiler Extern
+    ${Http_SOURCE_DIR}/Internal/ResourceCompiler 
+    ${Http_SOURCE_DIR}/Internal/ResourceCompiler
+    ${Http_BUILD_TEST}
+    ${Http_AUTO_RUN_TEST}
+)
+
+
+
+DefineExternalTargetEx(
     ParserBase Extern
     ${Http_SOURCE_DIR}/Internal/ParserBase 
     ${Http_SOURCE_DIR}/Internal/ParserBase
