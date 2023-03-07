@@ -18,4 +18,4 @@
 	url = https://github.com/CharlesCarley/Module.Threads.git
 [submodule "Internal/ResourceCompiler"]
 	path = Internal/ResourceCompiler
-	url = git@github.com:CharlesCarley/ResourceCompiler.git
+	url = https://github.com/CharlesCarley/ResourceCompiler.git
