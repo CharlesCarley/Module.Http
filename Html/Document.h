@@ -190,7 +190,7 @@ namespace Rt2::Html
 
         void endFooter() const;
 
-        void flex() const;
+        void flex(bool inl) const;
 
         void beginContainerDiv(bool stretch = true) const;
 

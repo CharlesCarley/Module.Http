@@ -295,7 +295,7 @@ namespace Rt2::Html
 
     void Document::noSpacing() const
     {
-        set("m-0 p-0");
+        set("m-0 p-0 g-0");
     }
 
     void Document::overflow(const OverFlow v) const
@@ -411,6 +411,7 @@ namespace Rt2::Html
         set("navbar navbar-expand");
         openTag("nav");
 
+        noSpacing();
         set("collapse navbar-collapse");
         openTag("div");
     }
@@ -423,10 +424,8 @@ namespace Rt2::Html
 
     void Document::beginNavList() const
     {
-        padding(All, 1);
         set("navbar-nav");
         openTag("ul");
-        margin(Left, 1);
     }
 
     void Document::navItem(const String& text) const
@@ -506,9 +505,9 @@ namespace Rt2::Html
         openTag("main");
     }
 
-    void Document::flex() const
+    void Document::flex(bool inl) const
     {
-        set("d-flex");
+        set(inl ? "d-inline-flex" : "d-flex" ) ;
     }
 
     void Document::endMain() const

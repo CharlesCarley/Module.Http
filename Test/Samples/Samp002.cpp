@@ -60,7 +60,7 @@ namespace Rt2::HtmlSample
             margin(Html::Horizontal, 1);
             margin(Html::Vertical, 0);
             navItem(name, href);
-            color(7);
+            color(-3);
             margin(Html::Horizontal, 1);
             margin(Html::Vertical, 0);
             navItem("/");
@@ -68,23 +68,23 @@ namespace Rt2::HtmlSample
 
         void writeHeader(const Path& path) const
         {
-            backgroundColor(-5);
+            backgroundColor(-9);
             beginHeader();
             beginNav();
-
-            Path        pth  = path.relativeTo(_root);
-            StringDeque dirs = path.directories();
-
             beginNavList();
             navListItem("Home", "/");
 
-            if (!dirs.empty())
+            Path pth = path.relativeTo(_root);
+
+            if (StringDeque dirs = path.directories();
+                !dirs.empty())
             {
                 String href = "/";
                 while (!dirs.empty())
                 {
                     const String& name = dirs.front();
-                    href               = Su::join(href, name, '/');
+
+                    href = Su::join(href, name, '/');
                     navListItem(name, href);
                     dirs.pop_front();
                 }
@@ -93,18 +93,15 @@ namespace Rt2::HtmlSample
             endList();
             endNav();
 
-            backgroundColor(-4);
-            borderColor(0);
-            border(Html::Bottom, 1);
-            margin(Html::Bottom, 1);
+            backgroundColor(-5);
+            padding(Html::Left, 2);
+            padding(Html::Vertical, 2);
             beginDiv();
+
             noSpacing();
-
             color(9);
-            textAlign(Html::AlignCenter);
-
-            paragraph(
-                Su::join('~', path.full()));
+            textAlign(Html::AlignStart);
+            paragraph(Su::join('~', path.full()));
             endDiv();
 
             endHeader();
@@ -120,7 +117,14 @@ namespace Rt2::HtmlSample
                 int i = 0;
 
                 if (!items.empty())
+                {
+                    gutter(Html::Right, 1);
+                    margin(Html::All, 1);
+                    //set("text-truncate");
+                    backgroundColor(0);
+                    border(Html::All, 1);
                     beginGroupList();
+                }
 
                 for (const Path& item : items)
                 {
@@ -128,13 +132,10 @@ namespace Rt2::HtmlSample
                         !local.isDotDirectory() &&
                         !item.isSymLink())
                     {
-                        if (++i % 2)
-                            backgroundColor(-4);
-                        else
-                            backgroundColor(-2);
-
-                        borderColor(-2);
-
+                        margin(Html::Bottom, 0);
+                        backgroundColor(0);
+                        border(Html::All, 0);
+                        accent(-2);
                         if (item.isDirectory())
                             listGroupItem(local.lastDirectory(), local.full());
                         else if (item.isFile())
@@ -148,7 +149,8 @@ namespace Rt2::HtmlSample
 
         void writeSideBar(const Path& path) const
         {
-            beginDivCol(Html::BreakSmall, 3);
+            noSpacing();
+            beginDivCol(Html::BreakMedium, 3);
             beginAside();
             writeSideBarList(path);
             endAside();
@@ -157,6 +159,8 @@ namespace Rt2::HtmlSample
 
         void writeContent(const Path& path)
         {
+            noSpacing();
+            backgroundColor(-5);
             beginDivCol();
             beginMain();
             drawListing(path);
@@ -166,6 +170,12 @@ namespace Rt2::HtmlSample
 
         void drawListing(const Path& path)
         {
+            gutter(Html::Right, 1);
+            margin(Html::All, 1);
+            padding(Html::All, 1);
+
+            backgroundColor(-3);
+            border(Html::All, 1);
             if (const Http::ContentType content(path.extension());
                 content.isPlainText())
             {
@@ -179,9 +189,9 @@ namespace Rt2::HtmlSample
                 }
                 else
                 {
-                    backgroundColor(-5);
-                    beginContainerDiv(true);
-                    endDiv();
+                    //beginContainerDiv(true);
+                    //paragraph("Error");
+                    //endDiv();
                 }
             }
             else
@@ -199,17 +209,17 @@ namespace Rt2::HtmlSample
                 }
                 else
                 {
-                    backgroundColor(-5);
-                    beginContainerDiv(true);
-                    endDiv();
+                    //beginContainerDiv(true);
+                    //paragraph("Error");
+                    //endDiv();
                 }
             }
         }
 
         void writeFooter(const Path& path) const
         {
-            beginFooter();
-            endFooter();
+            //beginFooter();
+            //endFooter();
         }
 
         void render(const Http::Response& response)
@@ -220,6 +230,7 @@ namespace Rt2::HtmlSample
 
             String css;
             Resource::getSite(css);
+            backgroundColor(-3);
             beginDoc(css);
 
             overflow(Html::OverFlowHide);
@@ -228,12 +239,13 @@ namespace Rt2::HtmlSample
             noSpacing();
             overflow(Html::OverFlowHide);
             beginContainerDiv(true);
+
+            noSpacing();
             beginDivRow();
 
             overflow(Html::OverFlowY);
             writeSideBar(full);
 
-            overflow(Html::OverFlowY);
             writeContent(full);
 
             endDiv();

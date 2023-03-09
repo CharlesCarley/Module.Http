@@ -66,6 +66,7 @@ namespace Rt2::Html
         Console::setForeground(CS_GREEN);
         Console::write(" to exit.");
         Console::nl();
+        Console::nl();
         Console::resetColor();
 
         const ExitSignal sig;
